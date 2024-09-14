@@ -6,7 +6,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author CYZ
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -156,8 +156,16 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
-        return false;
+        boolean hasMaxTile = false;
+        Iterator<Tile> iter = b.iterator();
+        while(iter.hasNext()){
+            Tile tile = iter.next();
+            if(tile != null && tile.value() == MAX_PIECE){
+                hasMaxTile = true;
+                break;
+            }
+        }
+        return hasMaxTile;
     }
 
     /**
