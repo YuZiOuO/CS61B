@@ -1,6 +1,7 @@
 package game2048;
 
 import java.util.Formatter;
+import java.util.Iterator;
 import java.util.Observable;
 
 
@@ -137,8 +138,16 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // TODO: Fill in this function.
-        return false;
+        boolean hasEmptyTile = false;
+        Iterator<Tile> iter = b.iterator();
+        while(iter.hasNext()){
+            Tile tile = iter.next();
+            if(tile == null){
+                hasEmptyTile = true;
+                break;
+            }
+        }
+        return hasEmptyTile;
     }
 
     /**
