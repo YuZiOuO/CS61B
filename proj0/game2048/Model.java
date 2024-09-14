@@ -108,12 +108,60 @@ public class Model extends Observable {
      *    and the trailing tile does not.
      * */
     public boolean tilt(Side side) {
-        boolean changed;
-        changed = false;
-
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        boolean changed;
+        changed = false;
+        boolean prevStatus = false;//检测上一次移动的状态(是否合并)
+        /** NOTE:
+         * 1.Tile@(0,0)在左下角
+         * 2.Tile.next()当Tile.next值为null时返回的是this,而非null.
+         * 3.board.move()调用后,原tile被解引用,新Tile的next指针为null.因此不应该使用Tile.next().
+         * 4.无需调用Tile.move()以及Tile.merge()，已经封装在board.move()中.
+         * 5.更新changed状态应在每次board.move()后
+         */
+        for(int col = 0; col < board.size(); col++) {
+            for(int row = board.size()-1; row >= 0; row--) {
+                Tile me = board.tile(col, row);
+                if(me == null){
+                    //跳过空Tile
+                    continue;
+                }
+
+                //寻找最近的非空Tile
+                Tile adjacent = null;
+                for(int rowNew = row+1;rowNew < board.size() ; rowNew++) {
+                    if(board.tile(col, rowNew) != null) {
+                        adjacent = board.tile(col, rowNew);
+                        break;
+                    }
+                }
+
+                //若找不到，则移动至顶格，并跳过后续判断
+                if(adjacent == null) {
+                    prevStatus = board.move(col, board.size()-1,me);
+                    changed = true;
+                    continue;
+                }
+
+                /**
+                 * 移动逻辑:
+                 * 若上次遍历已进行合并操作,或Tile值不相同,则移动至最近Tile下方
+                 * 若上次遍历未进行合并操作,且Tile值相同,则合并
+                 * 若都不满足则pass
+                 */
+                if(prevStatus || (adjacent.value() != me.value())) {
+                    prevStatus = board.move(adjacent.col(), adjacent.row() - 1, me);
+                    changed = true;
+                }
+                else if(adjacent.value() == me.value()){
+                    prevStatus = board.move(adjacent.col(), adjacent.row(), me);
+                    score += me.value()*2;
+                    changed = true;
+                }
+            }
+        }
 
         checkGameOver();
         if (changed) {
