@@ -108,9 +108,10 @@ public class Model extends Observable {
      *    and the trailing tile does not.
      * */
     public boolean tilt(Side side) {
-        // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        board.setViewingPerspective(side);
+
         boolean changed;
         changed = false;
         boolean prevStatus = false;//检测上一次移动的状态(是否合并)
@@ -131,9 +132,11 @@ public class Model extends Observable {
 
                 //寻找最近的非空Tile
                 Tile adjacent = null;
-                for(int rowNew = row+1;rowNew < board.size() ; rowNew++) {
-                    if(board.tile(col, rowNew) != null) {
-                        adjacent = board.tile(col, rowNew);
+                int rowAdj = row+1;
+                for(; rowAdj < board.size() ; rowAdj++) {
+                    if(board.tile(col, rowAdj) != null) {
+                        adjacent = board.tile(col, rowAdj);
+                        //不能直接调用adjacent.row()&col()，返回的是原视角的坐标;
                         break;
                     }
                 }
@@ -141,7 +144,10 @@ public class Model extends Observable {
                 //若找不到，则移动至顶格，并跳过后续判断
                 if(adjacent == null) {
                     prevStatus = board.move(col, board.size()-1,me);
-                    changed = true;
+                    if(me.row() != board.size()-1){
+                        //若本身为顶格，则未改变棋盘
+                        changed = true;
+                    }
                     continue;
                 }
 
@@ -152,17 +158,17 @@ public class Model extends Observable {
                  * 若都不满足则pass
                  */
                 if(prevStatus || (adjacent.value() != me.value())) {
-                    prevStatus = board.move(adjacent.col(), adjacent.row() - 1, me);
+                    prevStatus = board.move(col, rowAdj - 1, me);
                     changed = true;
                 }
                 else if(adjacent.value() == me.value()){
-                    prevStatus = board.move(adjacent.col(), adjacent.row(), me);
+                    prevStatus = board.move(col, rowAdj, me);
                     score += me.value()*2;
                     changed = true;
                 }
             }
         }
-
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
