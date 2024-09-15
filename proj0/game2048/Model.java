@@ -1,11 +1,12 @@
 package game2048;
 
 import java.util.Formatter;
+import java.util.Iterator;
 import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  @author CYZ
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -107,13 +108,67 @@ public class Model extends Observable {
      *    and the trailing tile does not.
      * */
     public boolean tilt(Side side) {
-        boolean changed;
-        changed = false;
-
-        // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        board.setViewingPerspective(side);
 
+        boolean changed;
+        changed = false;
+        boolean prevStatus = false;//检测上一次移动的状态(是否合并)
+        /** NOTE:
+         * 1.Tile@(0,0)在左下角
+         * 2.Tile.next()当Tile.next值为null时返回的是this,而非null.
+         * 3.board.move()调用后,原tile被解引用,新Tile的next指针为null.因此不应该使用Tile.next().
+         * 4.无需调用Tile.move()以及Tile.merge()，已经封装在board.move()中.
+         * 5.更新changed状态应在每次board.move()后
+         */
+        for(int col = 0; col < board.size(); col++) {
+            for(int row = board.size()-1; row >= 0; row--) {
+                Tile me = board.tile(col, row);
+                if(me == null){
+                    //跳过空Tile
+                    continue;
+                }
+
+                //寻找最近的非空Tile
+                Tile adjacent = null;
+                int rowAdj = row+1;
+                for(; rowAdj < board.size() ; rowAdj++) {
+                    if(board.tile(col, rowAdj) != null) {
+                        adjacent = board.tile(col, rowAdj);
+                        //不能直接调用adjacent.row()&col()，返回的是原视角的坐标;
+                        break;
+                    }
+                }
+
+                //若找不到，则移动至顶格，并跳过后续判断
+                if(adjacent == null) {
+                    prevStatus = board.move(col, board.size()-1,me);
+                    if(me.row() != board.size()-1){
+                        //若本身为顶格，则未改变棋盘
+                        changed = true;
+                    }
+                    continue;
+                }
+
+                /**
+                 * 移动逻辑:
+                 * 若上次遍历已进行合并操作,或Tile值不相同,则移动至最近Tile下方
+                 * 若上次遍历未进行合并操作,且Tile值相同,则合并
+                 * 若都不满足则pass
+                 */
+                if(prevStatus || (adjacent.value() != me.value())) {
+                    prevStatus = board.move(col, rowAdj - 1, me);
+                    changed = true;
+                }
+                else if(adjacent.value() == me.value()){
+                    prevStatus = board.move(col, rowAdj, me);
+                    score += me.value()*2;
+                    changed = true;
+                }
+            }
+        }
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
@@ -137,8 +192,16 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // TODO: Fill in this function.
-        return false;
+        boolean hasEmptyTile = false;
+        Iterator<Tile> iter = b.iterator();
+        while(iter.hasNext()){
+            Tile tile = iter.next();
+            if(tile == null){
+                hasEmptyTile = true;
+                break;
+            }
+        }
+        return hasEmptyTile;
     }
 
     /**
@@ -147,8 +210,16 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
-        return false;
+        boolean hasMaxTile = false;
+        Iterator<Tile> iter = b.iterator();
+        while(iter.hasNext()){
+            Tile tile = iter.next();
+            if(tile != null && tile.value() == MAX_PIECE){
+                hasMaxTile = true;
+                break;
+            }
+        }
+        return hasMaxTile;
     }
 
     /**
@@ -158,8 +229,27 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
-        // TODO: Fill in this function.
-        return false;
+        boolean hasEmptyTile = emptySpaceExists(b);
+        boolean hasSameAdjacentTiles = false;
+        if(!hasEmptyTile){
+            Iterator<Tile> iter = b.iterator();
+            while(iter.hasNext() && !hasSameAdjacentTiles){
+                Tile tile = iter.next();
+                int col = tile.col(),row = tile.row();
+                Tile[] adjacent = new Tile[4];
+                adjacent[0] = (col == 0)?null:b.tile(col-1,row); //left
+                adjacent[1] = (col == b.size()-1)?null:b.tile(col+1,row); //right
+                adjacent[2] = (row == 0)?null:b.tile(col,row-1); //up
+                adjacent[3] = (row == b.size()-1)?null:b.tile(col,row+1);//down
+                for(Tile t:adjacent){
+                    if(t != null && t.value() == tile.value()){
+                        hasSameAdjacentTiles = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return hasEmptyTile || hasSameAdjacentTiles;
     }
 
 
