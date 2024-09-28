@@ -22,7 +22,7 @@ public class TimeAList {
     }
 
     public static void timeAListConstruction() {
-        int MAX_TRIES = 10000000;
+        int MAX_TRIES = 128000;
         Stopwatch timer = new Stopwatch();
         AList<Integer> list = new AList<>();
         AList<Double> times = new AList<>();
