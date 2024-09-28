@@ -22,6 +22,23 @@ public class TimeAList {
     }
 
     public static void timeAListConstruction() {
-        // TODO: YOUR CODE HERE
+        int MAX_TRIES = 10000000;
+        Stopwatch timer = new Stopwatch();
+        AList<Integer> list = new AList<>();
+        AList<Double> times = new AList<>();
+        AList<Integer> OPCounts = new AList<>();
+        int i = 0;
+        int checkPoint = 1000;
+        while(i != MAX_TRIES+1){
+            if(i == checkPoint){
+                Double timeStamp = timer.elapsedTime();
+                times.addLast(timeStamp);
+                OPCounts.addLast(checkPoint);
+                checkPoint *= 2;
+            }
+            list.addLast(i);
+            i++;
+        }
+        printTimingTable(OPCounts, times, OPCounts);
     }
 }

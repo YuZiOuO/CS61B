@@ -22,7 +22,30 @@ public class TimeSLList {
     }
 
     public static void timeGetLast() {
-        // TODO: YOUR CODE HERE
-    }
+        int OPS = 10000;
+        int checkPoint=1000;
+        int maxN = 128000;
 
+        AList<Integer> Ns = new AList<>();
+        AList<Double> times = new AList<>();
+        AList<Integer> opCounts = new AList<>();
+        Stopwatch timer = new Stopwatch();
+        SLList<Integer> list = new SLList();
+
+        for(int i=0;i<=maxN;i++) {
+            list.addLast(0);
+            if(i==checkPoint) {
+                Double startTime = timer.elapsedTime();
+                for(int tries = 1; tries<=OPS; tries++) {
+                    list.getLast();
+                }
+                Double endTime = timer.elapsedTime();
+                Ns.addLast(checkPoint);
+                times.addLast(endTime-startTime);
+                opCounts.addLast(OPS);
+                checkPoint*=2;
+            }
+        }
+        printTimingTable(Ns, times, opCounts);
+    }
 }
