@@ -2,18 +2,6 @@ package deque;
 
 import static java.lang.Math.abs;
 
-interface Deque<T>{
-    void addFirst(T item);
-    void addLast(T item);
-    boolean isEmpty();
-    int size();
-    void printDeque();
-    T removeFirst();
-    T removeLast();
-    T get(int index);
-}
-
-//public class LinkedListDeque<T> implements Iterable<T>,Deque<T>
 public class LinkedListDeque<T> implements Deque<T>{
     static class Node<T>{
         T item;
@@ -107,7 +95,7 @@ public class LinkedListDeque<T> implements Deque<T>{
     }
 
     /* return ith item no matter whether the sign of i is positive */
-    public T _get(int index){
+    private T _get(int index){
         if(size == 0||index == 0||abs(index) > size){
             return null;
         }
