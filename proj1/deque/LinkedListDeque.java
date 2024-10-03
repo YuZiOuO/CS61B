@@ -34,7 +34,7 @@ public class LinkedListDeque<T> implements Deque<T>{
 
     @Override
     public void addFirst(T item){
-        Node<T> newNode = new Node<>(item,sentinel.prev,sentinel);
+        Node<T> newNode = new Node<>(item,sentinel,sentinel.next);
         sentinel.next.prev = newNode;
         sentinel.next = newNode;
         size++;
@@ -54,12 +54,12 @@ public class LinkedListDeque<T> implements Deque<T>{
     public void printDeque() {
         Node<T> current = sentinel;
         boolean travelled = false;
-        int index = 0;
-        while(!travelled){
+        int index = -1;
+        while(true){
             current = current.next;
             index++;
             if(current==sentinel){
-                travelled=true;
+                break;
             }
             System.out.print("["+index+"]"+current.item+"  ");
         }
@@ -88,13 +88,14 @@ public class LinkedListDeque<T> implements Deque<T>{
         return node.item;
     }
 
-    /* return ith item */
+    /* return ith item where i starts from 0 to size()-1 */
     @Override
     public T get(int index) {
+        index = index+1;//staring from 1;
         return _get(index>=index/2+1 ? index-size-1 : index);
     }
 
-    /* return ith item no matter whether the sign of i is positive */
+    /* return ith item **starting from 1** no matter whether the sign of i is positive (i of sentinel is 0)*/
     private T _get(int index){
         if(size == 0||index == 0||abs(index) > size){
             return null;
