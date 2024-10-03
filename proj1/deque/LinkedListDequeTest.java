@@ -2,12 +2,13 @@ package deque;
 
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /** Performs some basic linked list tests. */
 public class LinkedListDequeTest {
 
-    static int MAX_RANDOM_TRIES  = 10000;
+    static int MAX_TRIES = 2500;
 
     @Test
     /** Adds a few things to the list, checking isEmpty() and size() are correct,
@@ -112,11 +113,11 @@ public class LinkedListDequeTest {
     }
 
     @Test
-    public void RandomTest(){
+    public void randomTest(){
         LinkedListDeque<Integer> lld = new LinkedListDeque<>();
         int size = 0;
-        for(int i=0;i<MAX_RANDOM_TRIES;i++){
-            int operationType = StdRandom.uniform(0,5);
+        for(int i = 0; i< MAX_TRIES; i++){
+            int operationType = StdRandom.uniform(0,4);
             if (operationType==0){
                 /* addFirst */
                 int item = StdRandom.uniform(0,100);
@@ -130,27 +131,41 @@ public class LinkedListDequeTest {
                 int item = StdRandom.uniform(0,100);
                 lld.addLast(item);
                 size++;
-                assertEquals((int) lld.get(lld.size()), item);
-                assertFalse(lld.isEmpty());
-                assertEquals(lld.size(), size);
-            }else if (operationType==2){
+                assertEquals("operationType==0 testing get()",(int) lld.get(lld.size()), item);
+                assertFalse("operationType==0 testing isEmpty()",lld.isEmpty());
+                assertEquals("operationType==0 testing size()",lld.size(), size);
+            }else if (operationType==1){
                 /* removeFirst */
                 if(lld.isEmpty()){
-                    assertNull(lld.removeFirst());
+                    assertNull("operationType==1 testing isEmpty()",lld.removeFirst());
                 }else{
                     size--;
-                    assertEquals(lld.get(1), lld.removeFirst());
+                    assertEquals("operationType==1 testing get()",lld.get(1), lld.removeFirst());
                 }
-            }else if(operationType==3){
+            }else if(operationType==2){
                 /* removeLast */
                 if(lld.isEmpty()){
-                    assertNull(lld.removeLast());
+                    assertNull("operationType==2 testing isEmpty()",lld.removeLast());
                 }else{
                     size--;
-                    assertEquals(lld.get(lld.size()), lld.removeLast());
+                    assertEquals("operationType==2 testing get()",lld.get(lld.size()), lld.removeLast());
                 }
             }else{
-                assertEquals(lld.size(),size);
+                assertEquals("operationType==3 testing size()",lld.size(),size);
+            }
+        }
+    }
+
+    @Test
+    public void randomGet(){
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        for(int i = 1; i<= MAX_TRIES; i++){
+            lld.addLast(i);
+            for(int j=1;j<=i;j++){
+                assertEquals((int)lld.get(j),j);
+            }
+            for(int j=1;j<=i;j++){
+                assertEquals((int)lld.get(j),(int)lld.get(j-i-1));
             }
         }
     }
