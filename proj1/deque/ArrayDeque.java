@@ -127,17 +127,17 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         }
         if (arrLen > 8 && size <= arrLen / 4) {
             /* reduce capacity to one half of the original if size equal arrLen/4 */
-            T[] _arr = (T[]) new Object[arrLen / 2];
+            T[] arrNew = (T[]) new Object[arrLen / 2];
             if (nextFirst < nextLast) {
-                System.arraycopy(arr, nextFirst, _arr, 0, size + 1);
+                System.arraycopy(arr, nextFirst, arrNew, 0, size + 1);
             } else {
-                System.arraycopy(arr, nextFirst, _arr, 0, arrLen - nextFirst);
-                System.arraycopy(arr, 0, _arr, arrLen - nextFirst, nextLast);
+                System.arraycopy(arr, nextFirst, arrNew, 0, arrLen - nextFirst);
+                System.arraycopy(arr, 0, arrNew, arrLen - nextFirst, nextLast);
             }
             nextFirst = 0;
             nextLast = size + 1;
             arrLen = arrLen / 2;
-            arr = _arr;
+            arr = arrNew;
         }
     }
 

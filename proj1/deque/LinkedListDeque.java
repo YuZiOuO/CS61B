@@ -79,7 +79,9 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     }
 
     public T getRecursive(int index) {
-        if (size == 0 || index < 0 || index >= size) return null;
+        if (size == 0 || index < 0 || index >= size) {
+            return null;
+        }
         return getRecursiveNode(index + 1, sentinel);
     }
 
