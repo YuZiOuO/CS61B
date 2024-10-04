@@ -1,32 +1,25 @@
 package deque;
-import org.antlr.v4.runtime.misc.NotNull;
 
 import java.util.Iterator;
-import java.util.Objects;
 
 /**
  * Note:use Math.floorMod(int,int) to represent modulus operation instead of %
  */
-public class ArrayDeque<T> implements Deque<T>,Iterable<T>{
-    private T[] arr;
-    private int size;
-    private int arrLen;//should be 8*(4^n) where n is positive integer
-    private int nextFirst;
-    private int nextLast;
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     public ArrayDeque() {
         arr = (T[]) new Object[8];
         size = 0;
         arrLen = 8;
-        nextFirst = arrLen/2-1;
-        nextLast = arrLen/2;
+        nextFirst = arrLen / 2 - 1;
+        nextLast = arrLen / 2;
     }
 
     @Override
     public void addFirst(T item) {
         resize();
         arr[nextFirst] = item;
-        nextFirst = Math.floorMod(nextFirst-1, arrLen);
+        nextFirst = Math.floorMod(nextFirst - 1, arrLen);
         size++;
     }
 
@@ -34,7 +27,7 @@ public class ArrayDeque<T> implements Deque<T>,Iterable<T>{
     public void addLast(T item) {
         resize();
         arr[nextLast] = item;
-        nextLast = Math.floorMod(nextLast+1, arrLen);
+        nextLast = Math.floorMod(nextLast + 1, arrLen);
         size++;
     }
 
@@ -45,29 +38,29 @@ public class ArrayDeque<T> implements Deque<T>,Iterable<T>{
 
     @Override
     public void printDeque() {
-        for(int i = 0;i<size;i++) {
-            System.out.print("["+i+"]"+arr[(nextFirst+1+i)%arrLen] + "  ");
+        for (int i = 0; i < size; i++) {
+            System.out.print("[" + i + "]" + arr[(nextFirst + 1 + i) % arrLen] + "  ");
         }
     }
 
     @Override
     public T removeFirst() {
-        if(size == 0) {
+        if (size == 0) {
             return null;
         }
         resize();
-        nextFirst = Math.floorMod(nextFirst+1, arrLen);
+        nextFirst = Math.floorMod(nextFirst + 1, arrLen);
         size--;
         return arr[nextFirst];
     }
 
     @Override
     public T removeLast() {
-        if(size == 0) {
+        if (size == 0) {
             return null;
         }
         resize();
-        nextLast = Math.floorMod(nextLast-1, arrLen);
+        nextLast = Math.floorMod(nextLast - 1, arrLen);
         size--;
         return arr[nextLast];
     }
@@ -75,37 +68,12 @@ public class ArrayDeque<T> implements Deque<T>,Iterable<T>{
     /* staring from 1 */
     @Override
     public T get(int index) {
-        if(index<0 || index>size()-1){
+        if (index < 0 || index > size() - 1) {
             return null;
         }
-        return arr[(nextFirst+1+index)%arrLen];
+        return arr[(nextFirst + 1 + index) % arrLen];
     }
 
-    private void resize(){
-        if(nextFirst == nextLast) {
-            /* increase capacity to 2 times of the original */
-            T[] _arr = (T[])new Object[arrLen*2];
-            System.arraycopy(arr, nextFirst, _arr, arrLen*2-(arrLen-nextFirst), arrLen-nextFirst);
-            System.arraycopy(arr, 0, _arr, 0, nextLast);
-            arr = _arr;
-            nextFirst = arrLen*2-(arrLen-nextFirst);
-            arrLen = arrLen*2;
-        }
-        if(arrLen > 8 && size <= arrLen/4) {
-            /* reduce capacity to one half of the original if size equal arrLen/4 */
-            T[] _arr = (T[])new Object[arrLen/2];
-            if(nextFirst<nextLast){
-                System.arraycopy(arr, nextFirst, _arr, 0, size+1);
-            }else{
-                System.arraycopy(arr, nextFirst, _arr, 0, arrLen-nextFirst);
-                System.arraycopy(arr, 0, _arr, arrLen-nextFirst, nextLast);
-            }
-            nextFirst = 0;
-            nextLast = size+1;
-            arrLen = arrLen/2;
-            arr = _arr;
-        }
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -116,25 +84,58 @@ public class ArrayDeque<T> implements Deque<T>,Iterable<T>{
 
         /* Traverse all the list */
         boolean allEqual = true;
-        for (int i=0;i<size;i++){
+        for (int i = 0; i < size; i++) {
             allEqual = allEqual && get(i).equals(that.get(i));
         }
         return allEqual;
     }
 
-    public Iterator<T> iterator(){
+    public Iterator<T> iterator() {
         return new Iterator<T>() {
             int currentIndex = 0;
 
             @Override
             public boolean hasNext() {
-                return currentIndex<size;
+                return currentIndex < size;
             }
 
             @Override
             public T next() {
-                return currentIndex<size ? get(currentIndex++) : null;
+                return currentIndex < size ? get(currentIndex++) : null;
             }
         };
     }
+
+    private void resize() {
+        if (nextFirst == nextLast) {
+            /* increase capacity to 2 times of the original */
+            T[] _arr = (T[]) new Object[arrLen * 2];
+            System.arraycopy(arr, nextFirst, _arr, arrLen * 2 - (arrLen - nextFirst), arrLen - nextFirst);
+            System.arraycopy(arr, 0, _arr, 0, nextLast);
+            arr = _arr;
+            nextFirst = arrLen * 2 - (arrLen - nextFirst);
+            arrLen = arrLen * 2;
+        }
+        if (arrLen > 8 && size <= arrLen / 4) {
+            /* reduce capacity to one half of the original if size equal arrLen/4 */
+            T[] _arr = (T[]) new Object[arrLen / 2];
+            if (nextFirst < nextLast) {
+                System.arraycopy(arr, nextFirst, _arr, 0, size + 1);
+            } else {
+                System.arraycopy(arr, nextFirst, _arr, 0, arrLen - nextFirst);
+                System.arraycopy(arr, 0, _arr, arrLen - nextFirst, nextLast);
+            }
+            nextFirst = 0;
+            nextLast = size + 1;
+            arrLen = arrLen / 2;
+            arr = _arr;
+        }
+    }
+
+    private T[] arr;
+    private int size;
+    private int arrLen;//should be 8*(4^n) where n is positive integer
+    private int nextFirst;
+    private int nextLast;
+
 }

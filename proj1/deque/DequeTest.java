@@ -1,12 +1,12 @@
 package deque;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
+
 import static org.junit.Assert.assertEquals;
 
 public class DequeTest {
     @Test
-    public void DequeEqualsTest(){
+    public void DequeEqualsTest() {
         Deque<Integer> d1 = new ArrayDeque<>();
         Deque<Integer> d2 = new LinkedListDeque<>();
 
