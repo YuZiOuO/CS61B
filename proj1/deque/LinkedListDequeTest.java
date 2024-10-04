@@ -3,6 +3,9 @@ package deque;
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import static org.junit.Assert.*;
 
 /** Performs some basic linked list tests. */
@@ -175,7 +178,7 @@ public class LinkedListDequeTest {
     }
 
     @Test
-    public void simpleEqualsTests(){
+    public void simpleEqualsTest(){
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
         LinkedListDeque<Integer> lld2 = new LinkedListDeque<>();
         LinkedListDeque<Integer> lld3 = new LinkedListDeque<>();
@@ -192,8 +195,48 @@ public class LinkedListDequeTest {
         lld3.addLast(114514);
         lld3.addLast(3);
 
-        assertTrue(lld1.equals(lld2));
-        assertFalse(lld1.equals(lld3));
-        assertEquals(lld1.hashCode(),lld3.hashCode());
+        assertEquals(lld1, lld2);
+        assertNotEquals(lld1, lld3);
+    }
+
+    @Test
+    public void iteratorTest(){
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        LinkedList<Integer> lldc = new LinkedList<>();
+        for(int i = 0; i<=MAX_TRIES; i++){
+            int item = StdRandom.uniform(0,100);
+            lldc.addLast(item);
+            lld.addLast(item);
+        }
+
+        Iterator<Integer> it = lld.iterator();
+        Iterator<Integer> itc = lldc.iterator();
+        while(itc.hasNext()){
+            assertTrue(it.hasNext());
+            assertEquals(itc.next(),it.next());
+        }
+    }
+
+    @Test
+    public void iteratorTest2(){
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        lld.addLast(0);
+        lld.addLast(1);
+        lld.addLast(2);
+        lld.addLast(3);
+        lld.addLast(4);
+
+        Iterator<Integer> it = lld.iterator();
+        assertTrue(it.hasNext());
+        assertEquals((int)it.next(),0);
+        assertTrue(it.hasNext());
+        assertEquals((int)it.next(),1);
+        assertTrue(it.hasNext());
+        assertEquals((int)it.next(),2);
+        assertTrue(it.hasNext());
+        assertEquals((int)it.next(),3);
+        assertTrue(it.hasNext());
+        assertEquals((int)it.next(),4);
+        assertFalse(it.hasNext());
     }
 }

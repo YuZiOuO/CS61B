@@ -1,4 +1,6 @@
 package deque;
+import org.antlr.v4.runtime.misc.NotNull;
+
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -108,9 +110,9 @@ public class ArrayDeque<T> implements Deque<T>,Iterable<T>{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ArrayDeque)) return false;
-        ArrayDeque<?> that = (ArrayDeque<?>) o;
-        if (size != that.size) return false;
+        if (!(o instanceof Deque)) return false;
+        Deque<?> that = (Deque<?>) o;
+        if (size() != that.size()) return false;
 
         /* Traverse all the list */
         boolean allEqual = true;
@@ -118,11 +120,6 @@ public class ArrayDeque<T> implements Deque<T>,Iterable<T>{
             allEqual = allEqual && get(i).equals(that.get(i));
         }
         return allEqual;
-    }
-
-    @Override
-    public int hashCode(){
-        return Objects.hash(size,get(0),get(size-1));
     }
 
     public Iterator<T> iterator(){

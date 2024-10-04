@@ -1,12 +1,11 @@
 package deque;
 
 import java.util.Iterator;
-import java.util.Objects;
 
 import static java.lang.Math.abs;
 
 public class LinkedListDeque<T> implements Deque<T>,Iterable<T>{
-    static class Node<T>{
+    private static class Node<T>{
         T item;
         Node<T> prev;
         Node<T> next;
@@ -127,9 +126,9 @@ public class LinkedListDeque<T> implements Deque<T>,Iterable<T>{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof LinkedListDeque)) return false;
-        LinkedListDeque<?> that = (LinkedListDeque<?>) o;
-        if (size != that.size) return false;
+        if (!(o instanceof Deque)) return false;
+        Deque<?> that = (Deque<?>) o;
+        if (size() != that.size()) return false;
 
         /* Traverse all the list */
         boolean allEqual = true;
@@ -139,30 +138,22 @@ public class LinkedListDeque<T> implements Deque<T>,Iterable<T>{
         return allEqual;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(size,sentinel.next.item,sentinel.prev.item);
-    }
-
     public Iterator<T> iterator(){
         return new Iterator<T>() {
             Node<T> currentNode = sentinel;
-            boolean traversed = false;
+            int index = -1;
 
             @Override
             public boolean hasNext() {
-                return !traversed;
+                return index < size-1;
             }
 
             @Override
             public T next() {
                 currentNode = currentNode.next;
-                if(currentNode==sentinel){
-                    traversed = true;
-                }
-                return traversed ? null : currentNode.item;
+                index++;
+                return index>= size ? null : currentNode.item;
             }
         };
     }
-
 }
