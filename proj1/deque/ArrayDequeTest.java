@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 /** Performs some basic array list tests. */
 public class ArrayDequeTest {
-    static int MAX_TRIES = 4;
+    static int MAX_TRIES = 3000;
 
     @Test
     /** Adds a few things to the list, checking isEmpty() and size() are correct,
