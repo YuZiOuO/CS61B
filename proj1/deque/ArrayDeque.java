@@ -5,12 +5,12 @@ import java.util.Objects;
 /**
  * Note:use Math.floorMod(int,int) to represent modulus operation instead of %
  */
-public class ArrayDeque<T> implements Deque<T> {
-    T[] arr;
-    int size;
-    int arrLen;//should be 8*(4^n) where n is positive integer
-    int nextFirst;
-    int nextLast;
+public class ArrayDeque<T> implements Deque<T>,Iterable<T>{
+    private T[] arr;
+    private int size;
+    private int arrLen;//should be 8*(4^n) where n is positive integer
+    private int nextFirst;
+    private int nextLast;
 
     public ArrayDeque() {
         arr = (T[]) new Object[8];

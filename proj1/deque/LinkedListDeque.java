@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import static java.lang.Math.abs;
 
-public class LinkedListDeque<T> implements Deque<T>{
+public class LinkedListDeque<T> implements Deque<T>,Iterable<T>{
     static class Node<T>{
         T item;
         Node<T> prev;
@@ -17,7 +17,7 @@ public class LinkedListDeque<T> implements Deque<T>{
         }
     }
 
-    int size;
+    private int size;
     private final Node<T> sentinel;
 
     public LinkedListDeque(){
