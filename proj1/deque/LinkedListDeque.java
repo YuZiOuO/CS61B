@@ -111,6 +111,19 @@ public class LinkedListDeque<T> implements Deque<T>{
         return current.item;
     }
 
+    public T getRecursive(int index){
+        if(size == 0||index < 0||index >= size) return null;
+        return _getRecursive(index+1,sentinel);
+    }
+
+    private T _getRecursive(int index,Node<T> current){
+        if(index == 0) {
+            return current.item;
+        }else{
+            return _getRecursive(index-1,current.next);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
