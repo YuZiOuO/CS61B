@@ -1,4 +1,5 @@
 package deque;
+import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -33,11 +34,6 @@ public class ArrayDeque<T> implements Deque<T> {
         arr[nextLast] = item;
         nextLast = Math.floorMod(nextLast+1, arrLen);
         size++;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return size == 0;
     }
 
     @Override
@@ -127,5 +123,21 @@ public class ArrayDeque<T> implements Deque<T> {
     @Override
     public int hashCode(){
         return Objects.hash(size,get(0),get(size-1));
+    }
+
+    public Iterator<T> iterator(){
+        return new Iterator<T>() {
+            int currentIndex = 0;
+
+            @Override
+            public boolean hasNext() {
+                return currentIndex<size;
+            }
+
+            @Override
+            public T next() {
+                return currentIndex<size ? get(currentIndex++) : null;
+            }
+        };
     }
 }

@@ -1,5 +1,6 @@
 package deque;
 
+import java.util.Iterator;
 import java.util.Objects;
 
 import static java.lang.Math.abs;
@@ -43,11 +44,6 @@ public class LinkedListDeque<T> implements Deque<T>{
     }
 
     @Override
-    public boolean isEmpty(){
-        return size==0;
-    }
-
-    @Override
     public int size() {
         return size;
     }
@@ -55,7 +51,6 @@ public class LinkedListDeque<T> implements Deque<T>{
     @Override
     public void printDeque() {
         Node<T> current = sentinel;
-        boolean travelled = false;
         int index = -1;
         while(true){
             current = current.next;
@@ -135,4 +130,26 @@ public class LinkedListDeque<T> implements Deque<T>{
     public int hashCode() {
         return Objects.hash(size,sentinel.next.item,sentinel.prev.item);
     }
+
+    public Iterator<T> iterator(){
+        return new Iterator<T>() {
+            Node<T> currentNode = sentinel;
+            boolean traversed = false;
+
+            @Override
+            public boolean hasNext() {
+                return !traversed;
+            }
+
+            @Override
+            public T next() {
+                currentNode = currentNode.next;
+                if(currentNode==sentinel){
+                    traversed = true;
+                }
+                return traversed ? null : currentNode.item;
+            }
+        };
+    }
+
 }
