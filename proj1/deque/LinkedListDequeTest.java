@@ -113,6 +113,7 @@ public class LinkedListDequeTest {
     }
 
     @Test
+    /* Randomized tests including all kinds of operations. */
     public void randomTest(){
         LinkedListDeque<Integer> lld = new LinkedListDeque<>();
         int size = 0;
@@ -162,6 +163,7 @@ public class LinkedListDequeTest {
     }
 
     @Test
+    /* add large numbers of elements and check if get() is correct. */
     public void getTest(){
         LinkedListDeque<Integer> lld = new LinkedListDeque<>();
         for(int i = 0; i<=MAX_TRIES; i++){
@@ -170,5 +172,28 @@ public class LinkedListDequeTest {
                 assertEquals((int)lld.get(j),j);
             }
         }
+    }
+
+    @Test
+    public void simpleEqualsTests(){
+        LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
+        LinkedListDeque<Integer> lld2 = new LinkedListDeque<>();
+        LinkedListDeque<Integer> lld3 = new LinkedListDeque<>();
+
+        lld1.addLast(1);
+        lld1.addLast(2);
+        lld1.addLast(3);
+
+        lld2.addLast(1);
+        lld2.addLast(2);
+        lld2.addLast(3);
+
+        lld3.addLast(1);
+        lld3.addLast(114514);
+        lld3.addLast(3);
+
+        assertTrue(lld1.equals(lld2));
+        assertFalse(lld1.equals(lld3));
+        assertEquals(lld1.hashCode(),lld3.hashCode());
     }
 }

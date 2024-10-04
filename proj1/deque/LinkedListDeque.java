@@ -1,5 +1,7 @@
 package deque;
 
+import java.util.Objects;
+
 import static java.lang.Math.abs;
 
 public class LinkedListDeque<T> implements Deque<T>{
@@ -112,5 +114,25 @@ public class LinkedListDeque<T> implements Deque<T>{
             }
         }
         return current.item;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LinkedListDeque)) return false;
+        LinkedListDeque<?> that = (LinkedListDeque<?>) o;
+        if (size != that.size) return false;
+
+        /* Traverse all the list */
+        boolean allEqual = true;
+        for (int i=0;i<size;i++){
+            allEqual = allEqual && get(i).equals(that.get(i));
+        }
+        return allEqual;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(size,sentinel.next.item,sentinel.prev.item);
     }
 }

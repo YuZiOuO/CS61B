@@ -132,6 +132,7 @@ public class ArrayDequeTest {
     }
 
     @Test
+    /* Randomized tests for Add()&RemoveLast(). */
     public void randomAddRemoveLastCompareTest() {
         ArrayList<Integer> alist = new ArrayList<>();
         ArrayDeque<Integer> ad = new ArrayDeque<>();
@@ -149,6 +150,7 @@ public class ArrayDequeTest {
     }
 
     @Test
+    /* Similar to the previous one. */
     public void randomAddRemoveFirstCompareTest() {
         ArrayList<Integer> alist = new ArrayList<>();
         int[] arr = new int[MAX_TRIES];
@@ -165,4 +167,28 @@ public class ArrayDequeTest {
             assertEquals(printIntArrayList(alist), printIntArrayDeque(ad));
         }
     }
+
+    @Test
+    public void simpleEqualsTests(){
+        ArrayDeque<Integer> lld1 = new ArrayDeque<>();
+        ArrayDeque<Integer> lld2 = new ArrayDeque<>();
+        ArrayDeque<Integer> lld3 = new ArrayDeque<>();
+
+        lld1.addLast(1);
+        lld1.addLast(2);
+        lld1.addLast(3);
+
+        lld2.addLast(1);
+        lld2.addLast(2);
+        lld2.addLast(3);
+
+        lld3.addLast(1);
+        lld3.addLast(114514);
+        lld3.addLast(3);
+
+        assertTrue(lld1.equals(lld2));
+        assertFalse(lld1.equals(lld3));
+        assertEquals(lld1.hashCode(),lld3.hashCode());
+    }
+
 }

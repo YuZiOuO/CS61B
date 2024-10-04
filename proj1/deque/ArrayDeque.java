@@ -1,4 +1,6 @@
 package deque;
+import java.util.Objects;
+
 /**
  * Note:use Math.floorMod(int,int) to represent modulus operation instead of %
  */
@@ -105,5 +107,25 @@ public class ArrayDeque<T> implements Deque<T> {
             arrLen = arrLen/2;
             arr = _arr;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ArrayDeque)) return false;
+        ArrayDeque<?> that = (ArrayDeque<?>) o;
+        if (size != that.size) return false;
+
+        /* Traverse all the list */
+        boolean allEqual = true;
+        for (int i=0;i<size;i++){
+            allEqual = allEqual && get(i).equals(that.get(i));
+        }
+        return allEqual;
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(size,get(0),get(size-1));
     }
 }
