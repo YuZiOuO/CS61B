@@ -77,10 +77,16 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Deque)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Deque)) {
+            return false;
+        }
         Deque<?> that = (Deque<?>) o;
-        if (size() != that.size()) return false;
+        if (size() != that.size()) {
+            return false;
+        }
 
         /* Traverse all the list */
         boolean allEqual = true;
@@ -109,12 +115,15 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private void resize() {
         if (nextFirst == nextLast) {
             /* increase capacity to 2 times of the original */
-            T[] _arr = (T[]) new Object[arrLen * 2];
-            System.arraycopy(arr, nextFirst, _arr, arrLen * 2 - (arrLen - nextFirst), arrLen - nextFirst);
-            System.arraycopy(arr, 0, _arr, 0, nextLast);
-            arr = _arr;
-            nextFirst = arrLen * 2 - (arrLen - nextFirst);
-            arrLen = arrLen * 2;
+            T[] arrNew = (T[]) new Object[arrLen * 2];
+            int lenNew = arrLen * 2;
+            int lenOfSencondHalf = arrLen - nextFirst;
+            int nextFirstNew = lenNew - lenOfSencondHalf;
+            System.arraycopy(arr, nextFirst, arrNew, nextFirstNew, lenOfSencondHalf);
+            System.arraycopy(arr, 0, arrNew, 0, nextLast);
+            arr = arrNew;
+            nextFirst = nextFirstNew;
+            arrLen = lenNew;
         }
         if (arrLen > 8 && size <= arrLen / 4) {
             /* reduce capacity to one half of the original if size equal arrLen/4 */
@@ -134,7 +143,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     private T[] arr;
     private int size;
-    private int arrLen;//should be 8*(4^n) where n is positive integer
+    private int arrLen; //should be 8*(4^n) where n is positive integer
     private int nextFirst;
     private int nextLast;
 

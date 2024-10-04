@@ -6,7 +6,7 @@ import static org.junit.Assert.assertEquals;
 
 public class DequeTest {
     @Test
-    public void DequeEqualsTest() {
+    public void dequeEqualsTest() {
         Deque<Integer> d1 = new ArrayDeque<>();
         Deque<Integer> d2 = new LinkedListDeque<>();
 
