@@ -8,15 +8,16 @@ import java.util.ArrayList;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
-/** Performs some basic array list tests. */
+/**
+ * Performs some basic array list tests.
+ */
 public class ArrayDequeTest {
     static int MAX_TRIES = 3000;
 
     @Test
-    /** Adds a few things to the list, checking isEmpty() and size() are correct,
-     * finally printing the results.
-     *
-     * && is the "and" operation. */
+    /* Adds a few things to the list, checking isEmpty() and size() are correct,
+      finally printing the results.
+      NOTE: && is the "and" operation. */
     public void addIsEmptySizeTest() {
         ArrayDeque<String> lld1 = new ArrayDeque<>();
 
@@ -39,7 +40,7 @@ public class ArrayDequeTest {
     }
 
     @Test
-    /** Adds an item, then removes an item, and ensures that dll is empty afterwards. */
+    /* Adds an item, then removes an item, and ensures that dll is empty afterwards. */
     public void addRemoveTest() {
         ArrayDeque<Integer> lld1 = new ArrayDeque<Integer>();
         // should be empty
@@ -71,13 +72,13 @@ public class ArrayDequeTest {
         errorMsg += "  actual size() returned 0\n";
 
         assertEquals(errorMsg, 0, size);
-    };
+    }
 
     @Test
     /* Check if you can create ArrayDeques with different parameterized types*/
     public void multipleParamTest() {
-        ArrayDeque<String>  lld1 = new ArrayDeque<String>();
-        ArrayDeque<Double>  lld2 = new ArrayDeque<Double>();
+        ArrayDeque<String> lld1 = new ArrayDeque<String>();
+        ArrayDeque<Double> lld2 = new ArrayDeque<Double>();
         ArrayDeque<Boolean> lld3 = new ArrayDeque<Boolean>();
 
         lld1.addFirst("string");
@@ -114,36 +115,20 @@ public class ArrayDequeTest {
         }
     }
 
-    /* build a string in the format of ArrayDeque.printDeque() */
-    private String printIntArrayList(ArrayList<Integer> alist){
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < alist.size(); i++){
-            sb.append("["+i+"] "+alist.get(i)+"  ");
-        }
-        return sb.toString();
-    }
-    /* build a string in the format of ArrayDeque.printDeque() */
-    private String printIntArrayDeque(ArrayDeque<Integer> ad){
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i < ad.size(); i++){
-            sb.append("["+i+"] "+ad.get(i)+"  ");
-        }
-        return sb.toString();
-    }
 
     @Test
     /* Randomized tests for Add()&RemoveLast(). */
     public void randomAddRemoveLastCompareTest() {
         ArrayList<Integer> alist = new ArrayList<>();
         ArrayDeque<Integer> ad = new ArrayDeque<>();
-        for(int i = 0; i < MAX_TRIES; i++) {
-            int item = StdRandom.uniform(0,1000);
+        for (int i = 0; i < MAX_TRIES; i++) {
+            int item = StdRandom.uniform(0, 1000);
             alist.add(item);
             ad.addLast(item);
             assertEquals(printIntArrayList(alist), printIntArrayDeque(ad));
         }
-        for(int i = 0; i < MAX_TRIES; i++) {
-            alist.remove(alist.size()-1);
+        for (int i = 0; i < MAX_TRIES; i++) {
+            alist.remove(alist.size() - 1);
             ad.removeLast();
             assertEquals(printIntArrayList(alist), printIntArrayDeque(ad));
         }
@@ -155,13 +140,13 @@ public class ArrayDequeTest {
         ArrayList<Integer> alist = new ArrayList<>();
         int[] arr = new int[MAX_TRIES];
         ArrayDeque<Integer> ad = new ArrayDeque<>();
-        for(int i = 0; i < MAX_TRIES; i++) {
-            int item = StdRandom.uniform(0,1000);
-            alist.add(0,item);
+        for (int i = 0; i < MAX_TRIES; i++) {
+            int item = StdRandom.uniform(0, 1000);
+            alist.add(0, item);
             ad.addFirst(item);
             assertEquals(printIntArrayList(alist), printIntArrayDeque(ad));
         }
-        for(int i = 0; i < MAX_TRIES; i++) {
+        for (int i = 0; i < MAX_TRIES; i++) {
             alist.remove(0);
             ad.removeFirst();
             assertEquals(printIntArrayList(alist), printIntArrayDeque(ad));
@@ -169,7 +154,8 @@ public class ArrayDequeTest {
     }
 
     @Test
-    public void simpleEqualsTests(){
+    /* Test if equals() works correctly. */
+    public void simpleEqualsTests() {
         ArrayDeque<Integer> lld1 = new ArrayDeque<>();
         ArrayDeque<Integer> lld2 = new ArrayDeque<>();
         ArrayDeque<Integer> lld3 = new ArrayDeque<>();
@@ -188,7 +174,26 @@ public class ArrayDequeTest {
 
         assertTrue(lld1.equals(lld2));
         assertFalse(lld1.equals(lld3));
-        assertEquals(lld1.hashCode(),lld3.hashCode());
+        assertEquals(lld1.hashCode(), lld3.hashCode());
     }
+
+    /* build a string in the format of ArrayDeque.printDeque() */
+    private String printIntArrayList(ArrayList<Integer> alist) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < alist.size(); i++) {
+            sb.append("[" + i + "] " + alist.get(i) + "  ");
+        }
+        return sb.toString();
+    }
+
+    /* build a string in the format of ArrayDeque.printDeque() */
+    private String printIntArrayDeque(ArrayDeque<Integer> ad) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ad.size(); i++) {
+            sb.append("[" + i + "] " + ad.get(i) + "  ");
+        }
+        return sb.toString();
+    }
+
 
 }

@@ -2,6 +2,7 @@ package deque;
 
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -22,27 +23,27 @@ public class MaxArrayDequeTest {
     }
 
     @Test
-    public void RandomIntegerTest(){
+    public void RandomIntegerTest() {
         MaxArrayDeque<Integer> mad = new MaxArrayDeque<>(new IntegerComparator());
         int item = 0;
-        for(int i = 0; i < MAX_TRIES; i++){
-            int _item = StdRandom.uniform(0,3724);
+        for (int i = 0; i < MAX_TRIES; i++) {
+            int _item = StdRandom.uniform(0, 3724);
             item = Math.max(_item, item);
             mad.addLast(item);
         }
-        assertEquals(item,(int)mad.max());
+        assertEquals(item, (int) mad.max());
     }
 
     @Test
-    public void RandomDoubleTest(){
+    public void RandomDoubleTest() {
         MaxArrayDeque<Double> mad = new MaxArrayDeque<>(new DoubleComparator());
         double item = 0;
-        for(int i = 0; i < MAX_TRIES; i++){
-            double _item = StdRandom.uniform(0,61.0);
+        for (int i = 0; i < MAX_TRIES; i++) {
+            double _item = StdRandom.uniform(0, 61.0);
             item = Math.max(_item, item);
             mad.addLast(item);
         }
-        assertEquals(item,(double)mad.max(),0.0);
+        assertEquals(item, (double) mad.max(), 0.0);
     }
 }
 
@@ -52,6 +53,7 @@ class IntegerComparator implements Comparator<Integer> {
         return o1.compareTo(o2);
     }
 }
+
 class DoubleComparator implements Comparator<Double> {
     @Override
     public int compare(Double o1, Double o2) {
