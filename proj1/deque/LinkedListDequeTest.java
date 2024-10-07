@@ -3,53 +3,53 @@ package deque;
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+
 import static org.junit.Assert.*;
 
-/** Performs some basic linked list tests. */
+/**
+ * Performs some basic linked list tests.
+ */
 public class LinkedListDequeTest {
 
     static int MAX_TRIES = 1000;
 
     @Test
-    /** Adds a few things to the list, checking isEmpty() and size() are correct,
-     * finally printing the results.
-     *
-     * && is the "and" operation. */
     public void addIsEmptySizeTest() {
         LinkedListDeque<String> lld1 = new LinkedListDeque<String>();
 
-		assertTrue("A newly initialized LLDeque should be empty", lld1.isEmpty());
-		lld1.addFirst("front");
+        assertTrue("A newly initialized LLDeque should be empty", lld1.isEmpty());
+        lld1.addFirst("front");
 
-		// The && operator is the same as "and" in Python.
-		// It's a binary operator that returns true if both arguments true, and false otherwise.
+        // The && operator is the same as "and" in Python.
+        // It's a binary operator that returns true if both arguments true, and false otherwise.
         assertEquals(1, lld1.size());
         assertFalse("lld1 should now contain 1 item", lld1.isEmpty());
 
-		lld1.addLast("middle");
-		assertEquals(2, lld1.size());
+        lld1.addLast("middle");
+        assertEquals(2, lld1.size());
 
-		lld1.addLast("back");
-		assertEquals(3, lld1.size());
+        lld1.addLast("back");
+        assertEquals(3, lld1.size());
 
-		System.out.println("Printing out deque: ");
-		lld1.printDeque();
+        System.out.println("Printing out deque: ");
+        lld1.printDeque();
     }
 
     @Test
-    /** Adds an item, then removes an item, and ensures that dll is empty afterwards. */
     public void addRemoveTest() {
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
-		// should be empty
-		assertTrue("lld1 should be empty upon initialization", lld1.isEmpty());
+        // should be empty
+        assertTrue("lld1 should be empty upon initialization", lld1.isEmpty());
 
-		lld1.addFirst(10);
-		// should not be empty
-		assertFalse("lld1 should contain 1 item", lld1.isEmpty());
+        lld1.addFirst(10);
+        // should not be empty
+        assertFalse("lld1 should contain 1 item", lld1.isEmpty());
 
-		lld1.removeFirst();
-		// should be empty
-		assertTrue("lld1 should be empty after removal", lld1.isEmpty());
+        lld1.removeFirst();
+        // should be empty
+        assertTrue("lld1 should be empty after removal", lld1.isEmpty());
     }
 
     @Test
@@ -69,13 +69,13 @@ public class LinkedListDequeTest {
         errorMsg += "  actual size() returned 0\n";
 
         assertEquals(errorMsg, 0, size);
-    };
+    }
 
     @Test
     /* Check if you can create LinkedListDeques with different parameterized types*/
     public void multipleParamTest() {
-        LinkedListDeque<String>  lld1 = new LinkedListDeque<String>();
-        LinkedListDeque<Double>  lld2 = new LinkedListDeque<Double>();
+        LinkedListDeque<String> lld1 = new LinkedListDeque<String>();
+        LinkedListDeque<Double> lld2 = new LinkedListDeque<Double>();
         LinkedListDeque<Boolean> lld3 = new LinkedListDeque<Boolean>();
 
         lld1.addFirst("string");
@@ -114,68 +114,68 @@ public class LinkedListDequeTest {
 
     @Test
     /* Randomized tests including all kinds of operations. */
-    public void randomTest(){
+    public void randomTest() {
         LinkedListDeque<Integer> lld = new LinkedListDeque<>();
         int size = 0;
-        for(int i = 0; i< MAX_TRIES; i++){
-            int operationType = StdRandom.uniform(0,4);
-            if (operationType==0){
+        for (int i = 0; i < MAX_TRIES; i++) {
+            int operationType = StdRandom.uniform(0, 4);
+            if (operationType == 0) {
                 /* addFirst */
-                int item = StdRandom.uniform(0,100);
+                int item = StdRandom.uniform(0, 100);
                 lld.addFirst(item);
                 size++;
                 lld.printDeque();
                 assertEquals((int) lld.get(0), item);
                 assertFalse(lld.isEmpty());
                 assertEquals(lld.size(), size);
-            }else if (operationType==1){
+            } else if (operationType == 1) {
                 /* addLast */
-                int item = StdRandom.uniform(0,100);
+                int item = StdRandom.uniform(0, 100);
                 lld.addLast(item);
                 size++;
                 lld.printDeque();
-                assertEquals((int) lld.get(lld.size()-1), item);
+                assertEquals((int) lld.get(lld.size() - 1), item);
                 assertFalse(lld.isEmpty());
                 assertEquals(lld.size(), size);
-            }else if (operationType==2){
+            } else if (operationType == 2) {
                 /* removeFirst */
-                if(lld.isEmpty()){
+                if (lld.isEmpty()) {
                     assertNull(lld.removeFirst());
-                }else{
+                } else {
                     size--;
                     lld.printDeque();
                     assertEquals(lld.get(0), lld.removeFirst());
                 }
-            }else if(operationType==3){
+            } else if (operationType == 3) {
                 /* removeLast */
-                if(lld.isEmpty()){
+                if (lld.isEmpty()) {
                     assertNull(lld.removeLast());
-                }else{
+                } else {
                     size--;
                     lld.printDeque();
-                    assertEquals(lld.get(lld.size()-1), lld.removeLast());
+                    assertEquals(lld.get(lld.size() - 1), lld.removeLast());
                 }
-            }else{
+            } else {
                 lld.printDeque();
-                assertEquals(lld.size(),size);
+                assertEquals(lld.size(), size);
             }
         }
     }
 
     @Test
     /* add large numbers of elements and check if get() is correct. */
-    public void getTest(){
+    public void getTest() {
         LinkedListDeque<Integer> lld = new LinkedListDeque<>();
-        for(int i = 0; i<=MAX_TRIES; i++){
+        for (int i = 0; i <= MAX_TRIES; i++) {
             lld.addLast(i);
-            for(int j=0;j<i;j++){
-                assertEquals((int)lld.get(j),j);
+            for (int j = 0; j < i; j++) {
+                assertEquals((int) lld.get(j), j);
             }
         }
     }
 
     @Test
-    public void simpleEqualsTests(){
+    public void simpleEqualsTest() {
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<>();
         LinkedListDeque<Integer> lld2 = new LinkedListDeque<>();
         LinkedListDeque<Integer> lld3 = new LinkedListDeque<>();
@@ -192,8 +192,48 @@ public class LinkedListDequeTest {
         lld3.addLast(114514);
         lld3.addLast(3);
 
-        assertTrue(lld1.equals(lld2));
-        assertFalse(lld1.equals(lld3));
-        assertEquals(lld1.hashCode(),lld3.hashCode());
+        assertEquals(lld1, lld2);
+        assertNotEquals(lld1, lld3);
+    }
+
+    @Test
+    public void iteratorTest() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        LinkedList<Integer> lldc = new LinkedList<>();
+        for (int i = 0; i <= MAX_TRIES; i++) {
+            int item = StdRandom.uniform(0, 100);
+            lldc.addLast(item);
+            lld.addLast(item);
+        }
+
+        Iterator<Integer> it = lld.iterator();
+        Iterator<Integer> itc = lldc.iterator();
+        while (itc.hasNext()) {
+            assertTrue(it.hasNext());
+            assertEquals(itc.next(), it.next());
+        }
+    }
+
+    @Test
+    public void iteratorTest2() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        lld.addLast(0);
+        lld.addLast(1);
+        lld.addLast(2);
+        lld.addLast(3);
+        lld.addLast(4);
+
+        Iterator<Integer> it = lld.iterator();
+        assertTrue(it.hasNext());
+        assertEquals((int) it.next(), 0);
+        assertTrue(it.hasNext());
+        assertEquals((int) it.next(), 1);
+        assertTrue(it.hasNext());
+        assertEquals((int) it.next(), 2);
+        assertTrue(it.hasNext());
+        assertEquals((int) it.next(), 3);
+        assertTrue(it.hasNext());
+        assertEquals((int) it.next(), 4);
+        assertFalse(it.hasNext());
     }
 }
