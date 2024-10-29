@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterable<K> {
+public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     private static class BSTNode<K extends Comparable<K>, V> {
         // left for the less
@@ -116,11 +116,6 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V>, Iterabl
     public BSTMap() {
         root = null;
         size = 0;
-    }
-
-    public BSTMap(K key, V value) {
-        root = new BSTNode<>(key, value);
-        size = 1;
     }
 
     /**
