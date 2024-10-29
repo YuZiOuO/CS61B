@@ -51,7 +51,15 @@ public class BSTMap<K extends Comparable,V> implements Map61B{
             return node;
         }
 
-
+        /* Print all keys and values recursively */
+        public static <K extends Comparable,V> void printRecursive(BSTNode<K,V> node) {
+            if (node == null) {
+                return;
+            }
+            printRecursive(node.left);
+            System.out.print("["+node.key + "]"+node.value+"\t");
+            printRecursive(node.right);
+        }
     }
     private BSTNode<K,V> root;
     private int size;
@@ -115,8 +123,13 @@ public class BSTMap<K extends Comparable,V> implements Map61B{
     @Override
     public void put(Object key, Object value) {
         // TODO: Type Checking?
-        BSTNode.insert(root,(K)key,(V)value);
-        size ++;
+        // Note: "root = " is important,otherwise you would not insert anything if the map is empty.
+        root = BSTNode.insert(root,(K)key,(V)value);
+        size++;
+    }
+
+    public void printInOrder(){
+        BSTNode.printRecursive(root);
     }
 
     /**
@@ -160,5 +173,4 @@ public class BSTMap<K extends Comparable,V> implements Map61B{
         //return null;
     }
 
-    // TODO: printInOrder()
 }
