@@ -79,13 +79,9 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
                 return null;
             }
 
-            // TODO: some kind of ugly
             BSTNode<K, V> left = node.left;
             BSTNode<K, V> right = node.right;
-            if (left != null && key.equals(left.key)) {
-                return node;
-            }
-            if (right != null && key.equals(right.key)) {
+            if ((left != null && key.equals(left.key)) || (right != null && key.equals(right.key))) {
                 return node;
             }
 
@@ -247,22 +243,48 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     }
 
     /**
-     * Returns an iterator over elements of type {@code T}.
+     * Returns an iterator over elements of type {@code K}.
+     * Each of the methods has the time O(logN);
      *
      * @return an Iterator.
      */
     @Override
     public Iterator<K> iterator() {
+        // TODO: Broken
         return new Iterator<>() {
-            // TODO: implement this.
+            private K current = BSTNode.findNearestRecursive(root, true).key;
+
             @Override
             public boolean hasNext() {
-                return false;
+                return current != BSTNode.findNearestRecursive(root, false).key;
             }
 
             @Override
             public K next() {
-                return null;
+                setNext(root, current);
+                return current;
+            }
+
+            /**
+             * Set current to the key that is greater than previous current and less than other keys.
+             * Return the corresponding node of the given key(In order to maintain recursive).
+             */
+            private BSTNode<K, V> setNext(BSTNode<K, V> node, K key) {
+                // Special case
+                if (key == root.key) {
+                    current = BSTNode.findNearestRecursive(node.right, true).key;
+                    return node;
+                }
+
+                if (node.key.equals(key)) {
+                    return node;
+                }
+                if (node.key.compareTo(key) > 0) {
+                    current = node.key;
+                    return setNext(node.left, key);
+                } else {
+                    return setNext(node.right, key);
+                }
             }
         };
     }
