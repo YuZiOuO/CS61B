@@ -50,7 +50,7 @@ public class Commit implements Serializable {
     }
 
     void dump() {
-        Utils.writeObject(Utils.join(COMMIT_DIR, sha1(this)), Commit.class);
+        Utils.writeObject(Utils.join(COMMIT_DIR, sha1(this.toString())), Commit.class);
     }
 
     private Map<String, HashFile> cache(Map<String, HashFile> files) throws IOException {
@@ -64,5 +64,10 @@ public class Commit implements Serializable {
         return cached;
     }
 
+    @Override
+    public String toString() {
+        return "Commit@"+timestamp.toString()+"\nmessage:"+message+"\nparent:"+parent
+                +"\nfiles:"+files.toString();
+    }
     // TODO: fix IOException.
 }

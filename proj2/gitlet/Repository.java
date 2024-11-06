@@ -29,7 +29,6 @@ public class Repository implements Serializable {
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
     public static final String REPO_FILENAME = "repo";
-
     public static final String INITIAL_COMMIT_MESSAGE = "initial commit";
 
     private String HEAD;
@@ -45,15 +44,18 @@ public class Repository implements Serializable {
 
     public Repository() throws IOException {
         refs = new TreeMap<>();
+        currentBranch = "master";
         commitTree = new TreeSet<>();
         stagingArea = new StagingArea();
         stagingArea.addAll();
-        commit(INITIAL_COMMIT_MESSAGE,Date.from(Instant.EPOCH));
+        if(Commit.COMMIT_DIR.mkdirs() && StagingArea.STAGING_AREA_DIR.mkdirs()) {
+            commit(INITIAL_COMMIT_MESSAGE, Date.from(Instant.EPOCH));
+        }
     }
 
     public void commit(String message, Date timestamp) throws IOException {
-        Commit c = stagingArea.extract(message,refs.get(currentBranch),timestamp);
-        String hash = sha1(c);
+        Commit c = stagingArea.extract(message,currentBranch,timestamp);
+        String hash = sha1(c.toString());
         refs.put(currentBranch, hash);
         commitTree.add(hash);
         c.dump();

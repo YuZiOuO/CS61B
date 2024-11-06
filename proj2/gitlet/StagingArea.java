@@ -12,9 +12,11 @@ import static gitlet.Utils.*;
 class StagingArea {
     static final File STAGING_AREA_DIR = join(Repository.GITLET_DIR, "staged");
 
-    private static String stagingAreaPath;
-
     private static HashMap<String, HashFile> files;
+
+    StagingArea(){
+        files = new HashMap<>();
+    }
 
     void add(String[] name) throws IOException {
         if (name == null) {
@@ -22,11 +24,11 @@ class StagingArea {
         }
 
         for (String n : name) {
-            if (n.equals(".gitlet")) {
+            File src = join(Repository.CWD, n);
+            if(src.isDirectory()) {
                 continue;
             }
 
-            File src = join(Repository.CWD, name);
             byte[] buf = readContents(src);
             String hash = sha1(buf);
 

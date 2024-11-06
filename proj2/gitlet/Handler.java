@@ -10,24 +10,27 @@ public class Handler {
     public static final File CWD = new File(System.getProperty("user.dir"));
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
+    static Repository loadRepository(){
+        return Repository.load(join(GITLET_DIR,Repository.REPO_FILENAME));
+    }
+
     static boolean repoExists(){
         return GITLET_DIR.exists() && GITLET_DIR.isDirectory();
     }
 
     static void init() throws IOException {
-        if(repoExists()) {
+        if(GITLET_DIR.mkdirs()){
+            Repository repo = new Repository();
+            repo.dump();
+        }else{
             System.out.println("A Gitlet version-control system already exists in the current directory.");
-            return;
         }
-        GITLET_DIR.mkdir();
-        Repository repo = new Repository();
-        repo.dump();
     }
 
     static void add(Repository repo,String[] name) throws IOException {
         List<String> allFiles = plainFilenamesIn(CWD);
         for(String n:name){
-            if(!allFiles.contains(n)){
+            if (allFiles != null && !allFiles.contains(n)) {
                 System.out.println("File does not exist.");
                 continue;
             }
