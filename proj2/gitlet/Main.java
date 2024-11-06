@@ -10,6 +10,12 @@ public class Main {
      */
     public static void main(String[] args) {
         // TODO: what if args is empty?
+
+        // TODO: args checking
+        if(!argCheck(args)) {
+            System.exit(0);
+        }
+
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
@@ -20,5 +26,10 @@ public class Main {
                 break;
             // TODO: FILL THE REST IN
         }
+    }
+
+    // TODO: args checking
+    public static boolean argCheck(String[] args) {
+        return false;
     }
 }
