@@ -54,7 +54,7 @@ public class Repository implements Serializable {
     }
 
     public void commit(String message, Date timestamp) throws IOException {
-        Commit c = stagingArea.extract(message,currentBranch,timestamp);
+        Commit c = stagingArea.toCommit(message,currentBranch,timestamp);
         String hash = sha1(c.toString());
         refs.put(currentBranch, hash);
         commitTree.add(hash);

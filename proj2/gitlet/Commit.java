@@ -35,10 +35,10 @@ public class Commit implements Serializable {
 
     private final Date timestamp;
 
-    private Map<String, HashFile> files;
+    private Map<String, Blob> files;
 
     /* 直接提取StagingArea中的文件 */
-    public Commit(String message, String parent, Date timestamp, Map<String, HashFile> files) throws IOException {
+    Commit(String message, String parent, Date timestamp, Map<String, Blob> files) throws IOException {
         this.message = message;
         this.parent = parent;
         this.timestamp = timestamp;
@@ -53,15 +53,11 @@ public class Commit implements Serializable {
         Utils.writeObject(Utils.join(COMMIT_DIR, sha1(this.toString())), Commit.class);
     }
 
-    private Map<String, HashFile> cache(Map<String, HashFile> files) throws IOException {
-        Map<String, HashFile> cached = new HashMap<>();
-        for (String name : files.keySet()) {
-            HashFile src = files.get(name);
-            HashFile dest = (HashFile) join(COMMIT_DIR, src.getContentHash());
-            Files.copy(src.toPath(), dest.toPath());
-            cached.put(name, dest);
+    private Map<String, Blob> cache(Map<String, Blob> files) throws IOException {
+        for (Blob b: files.values()) {
+            b.ref();
         }
-        return cached;
+        return files;
     }
 
     @Override

@@ -6,43 +6,28 @@ import java.nio.file.Files;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static gitlet.Utils.*;
 
 class StagingArea {
     static final File STAGING_AREA_DIR = join(Repository.GITLET_DIR, "staged");
 
-    private static HashMap<String, HashFile> files;
+    private static HashMap<String, Blob> workingTree;
 
     StagingArea(){
-        files = new HashMap<>();
+        workingTree = new HashMap<>();
     }
 
     void add(String[] name) throws IOException {
         if (name == null) {
             return;
         }
-
         for (String n : name) {
             File src = join(Repository.CWD, n);
-            if(src.isDirectory()) {
-                continue;
-            }
-
-            byte[] buf = readContents(src);
-            String hash = sha1(buf);
-
-            HashFile original = files.get(n);
-            if (original != null) {
-                if (original.getContentHash().equals(hash)) {
-                    continue;
-                }
-                Files.delete(original.toPath());
-                continue; //adjust for guide
-            }
-            File dest = join(STAGING_AREA_DIR, hash);
-            Files.copy(src.toPath(), dest.toPath());
-            files.put(n, new HashFile(dest));
+            Blob prev = workingTree.get(n);
+            prev.pop();
+            workingTree.put(n,Blob.push(src));
         }
     }
 
@@ -53,24 +38,34 @@ class StagingArea {
         }
     }
 
+    void remove(String[] name){
+        if(name == null) {
+            return;
+        }
+        for(String n : name){
+            File src = join(Repository.CWD, n);
+            Blob prev = workingTree.get(n);
+            //TODO: implementation
+        }
+    }
+
     void clear() {
-        for (HashFile f : files.values()) {
+        for (Blob f : workingTree.values()) {
             f.delete();
         }
-        files.clear();
+        workingTree.clear();
     }
 
     boolean isClear() {
-        return files.isEmpty();
+        return workingTree.isEmpty();
     }
 
     boolean contains(String name) {
-        return files.containsKey(name);
+        return workingTree.containsKey(name);
     }
 
-    Commit extract(String message, String parent, Date timestamp) throws IOException {
-        clear();
-        return new Commit(message, parent, timestamp, files);
+    Commit toCommit(String message, String parent, Date timestamp) throws IOException {
+        return new Commit(message, parent, timestamp, workingTree);
     }
 
 }
