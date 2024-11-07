@@ -2,7 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -10,62 +10,63 @@ import java.util.Map;
 
 import static gitlet.Utils.*;
 
-class StagingArea {
-    static final File STAGING_AREA_DIR = join(Repository.GITLET_DIR, "staged");
-
-    private static HashMap<String, Blob> workingTree;
+class StagingArea implements Serializable {
+    private HashMap<String,Blob> previousTree;
+    private final HashMap<String,Blob> workingTree;
 
     StagingArea(){
+        previousTree = new HashMap<>();
         workingTree = new HashMap<>();
     }
 
-    void add(String[] name) throws IOException {
+    void add(String name){
         if (name == null) {
             return;
         }
-        for (String n : name) {
-            File src = join(Repository.CWD, n);
-            Blob prev = workingTree.get(n);
+        File src = join(Repository.CWD, name);
+        Blob prev = workingTree.get(name);
+        workingTree.put(name,Blob.push(src));
+        if (prev != null) {
             prev.pop();
-            workingTree.put(n,Blob.push(src));
         }
     }
 
-    void addAll() throws IOException {
+    void addAll(){
         List<String> allFiles = plainFilenamesIn(Repository.CWD);
         if (allFiles != null) {
-            this.add(allFiles.toArray(new String[0]));
+            for (String filename : allFiles) {
+                this.add(filename);
+            }
         }
     }
 
-    void remove(String[] name){
+    void remove(String name){
         if(name == null) {
             return;
         }
-        for(String n : name){
-            File src = join(Repository.CWD, n);
-            Blob prev = workingTree.get(n);
-            //TODO: implementation
+        File src = join(Repository.CWD, name);
+        Blob prev = workingTree.get(name);
+        if (prev.getHash().equals(sha1(readContents(src)))) {
+            workingTree.put(name,null);
+            prev.pop();
+            src.delete();
+        }else{
+            Blob last = previousTree.get(name);
+            workingTree.put(name,last);
+            prev.pop();
+            last.ref();
         }
     }
 
-    void clear() {
-        for (Blob f : workingTree.values()) {
-            f.delete();
-        }
-        workingTree.clear();
-    }
-
-    boolean isClear() {
-        return workingTree.isEmpty();
-    }
-
-    boolean contains(String name) {
-        return workingTree.containsKey(name);
+    boolean contains(String name){
+        return name != null && workingTree.containsKey(name);
     }
 
     Commit toCommit(String message, String parent, Date timestamp) throws IOException {
+        previousTree = new HashMap<>(workingTree);
+        for(Blob f : workingTree.values()) {
+            f.ref();
+        }
         return new Commit(message, parent, timestamp, workingTree);
     }
-
 }

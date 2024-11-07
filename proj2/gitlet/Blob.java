@@ -1,18 +1,14 @@
 package gitlet;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.HashSet;
-
 import static gitlet.Utils.*;
 
 /* 用于内容不会变动的文件 */
 class Blob extends File {
     static File BLOB_DIR = Utils.join(Repository.GITLET_DIR, "blob");
 
-    private String hash;
-    private byte[] buf;
+    private final String hash;
+    private final byte[] buf;
     private int refs;
 
     private Blob(File f){
@@ -34,21 +30,19 @@ class Blob extends File {
         }
     }
 
-    int pop() throws IOException {
+    int pop(){
         refs--;
         if(refs == 0){
-            Files.delete(this.toPath());
+            this.delete();
         }
         return refs;
     }
 
+    String getHash(){
+        return hash;
+    }
+
     void ref(){
         refs++;
-    }
-    void deref() throws IOException {
-        refs--;
-        if(refs == 0){
-            Files.delete(this.toPath());
-        }
     }
 }

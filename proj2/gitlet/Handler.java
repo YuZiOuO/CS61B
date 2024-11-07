@@ -14,10 +14,6 @@ public class Handler {
         return Repository.load(join(GITLET_DIR,Repository.REPO_FILENAME));
     }
 
-    static boolean repoExists(){
-        return GITLET_DIR.exists() && GITLET_DIR.isDirectory();
-    }
-
     static void init() throws IOException {
         if(GITLET_DIR.mkdirs()){
             Repository repo = new Repository();
@@ -27,23 +23,26 @@ public class Handler {
         }
     }
 
-    static void add(Repository repo,String[] name) throws IOException {
+    static void add(String name) throws IOException {
         List<String> allFiles = plainFilenamesIn(CWD);
-        for(String n:name){
-            if (allFiles != null && !allFiles.contains(n)) {
-                System.out.println("File does not exist.");
-                continue;
-            }
-            repo.stagingArea.add(name);
+        if (allFiles != null && !allFiles.contains(name)) {
+            System.out.println("File does not exist.");
         }
+        loadRepository().stagingArea.add(name);
     }
 
-    static void commit(Repository repo,String message) throws IOException {
-        repo.commit(message, now());
+    static void commit(String message) throws IOException {
+        loadRepository().commit(message, now());
     }
 
-    static void rm(File file){
-
+    static void rm(String name){
+        Repository _repo = loadRepository();
+        StagingArea stagingArea = _repo.stagingArea;
+        if(!stagingArea.contains(name) && !_repo.HEAD().contain(name)){
+            System.out.println("No reason to remove the file.");
+            return;
+        }
+        _repo.stagingArea.remove(name);
     }
 
     static void log(){

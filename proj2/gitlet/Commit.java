@@ -50,7 +50,7 @@ public class Commit implements Serializable {
     }
 
     void dump() {
-        Utils.writeObject(Utils.join(COMMIT_DIR, sha1(this.toString())), Commit.class);
+        Utils.writeObject(Utils.join(COMMIT_DIR, sha1(this.toString())), this);
     }
 
     private Map<String, Blob> cache(Map<String, Blob> files) throws IOException {
@@ -58,6 +58,10 @@ public class Commit implements Serializable {
             b.ref();
         }
         return files;
+    }
+
+    boolean contain(String name){
+        return name != null && files.containsKey(name);
     }
 
     @Override

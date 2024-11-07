@@ -31,7 +31,6 @@ public class Repository implements Serializable {
     public static final String REPO_FILENAME = "repo";
     public static final String INITIAL_COMMIT_MESSAGE = "initial commit";
 
-    private String HEAD;
     private String currentBranch;
 
     private Map<String, String> refs;
@@ -48,7 +47,7 @@ public class Repository implements Serializable {
         commitTree = new TreeSet<>();
         stagingArea = new StagingArea();
         stagingArea.addAll();
-        if(Commit.COMMIT_DIR.mkdirs() && StagingArea.STAGING_AREA_DIR.mkdirs()) {
+        if(Commit.COMMIT_DIR.mkdirs()) {
             commit(INITIAL_COMMIT_MESSAGE, Date.from(Instant.EPOCH));
         }
     }
@@ -66,6 +65,11 @@ public class Repository implements Serializable {
     };
 
     void dump(){
-        writeObject(join(GITLET_DIR,REPO_FILENAME),Repository.class);
+        writeObject(join(GITLET_DIR,REPO_FILENAME),this);
     };
+
+    Commit HEAD(){
+        File path = join(Commit.COMMIT_DIR,refs.get(currentBranch));
+        return Commit.load(path);
+    }
 }
