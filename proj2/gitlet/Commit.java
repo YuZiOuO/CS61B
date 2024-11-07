@@ -1,9 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Files;
 import java.util.*;
 
 import static gitlet.Utils.*;
@@ -13,7 +11,7 @@ import static gitlet.Utils.*;
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- * @author TODO
+ * @author CYZ
  */
 public class Commit implements Serializable {
     static File COMMIT_DIR = Utils.join(Repository.GITLET_DIR, "commit");
@@ -35,33 +33,41 @@ public class Commit implements Serializable {
 
     private final Date timestamp;
 
-    private Map<String, Blob> files;
+    private final Map<String, String> files;
 
     /* 直接提取StagingArea中的文件 */
-    Commit(String message, String parent, Date timestamp, Map<String, Blob> files) throws IOException {
+    Commit(String message, String parent, Date timestamp, Map<String, Blob> files){
         this.message = message;
         this.parent = parent;
         this.timestamp = timestamp;
         this.files = cache(files);
     }
 
-    static Commit load(File file) {
-        return Utils.readObject(file, Commit.class);
+    static Commit load(String hash) {
+        return Utils.readObject(join(COMMIT_DIR,hash), Commit.class);
     }
 
     void dump() {
         Utils.writeObject(Utils.join(COMMIT_DIR, sha1(this.toString())), this);
     }
 
-    private Map<String, Blob> cache(Map<String, Blob> files) throws IOException {
-        for (Blob b: files.values()) {
+    private Map<String, String> cache(Map<String, Blob> files){
+        HashMap<String,String> _files = new HashMap<>();
+        for (String name : files.keySet()) {
+            Blob b = files.get(name);
             b.ref();
+            _files.put(name,b.getHash());
+            b.dump();
         }
-        return files;
+        return _files;
     }
 
     boolean contain(String name){
         return name != null && files.containsKey(name);
+    }
+
+    Blob getBlob(String name){
+        return Blob.load(files.get(name));
     }
 
     @Override
@@ -69,5 +75,4 @@ public class Commit implements Serializable {
         return "Commit@"+timestamp.toString()+"\nmessage:"+message+"\nparent:"+parent
                 +"\nfiles:"+files.toString();
     }
-    // TODO: fix IOException.
 }

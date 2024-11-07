@@ -28,6 +28,9 @@ public class Main {
             case "rm":
                 Handler.rm(args[1]);
                 break;
+            case "checkout":
+                Handler.checkout(args[1],args[2],null); //TODO
+                break;
         }
     }
 }

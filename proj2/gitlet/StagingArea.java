@@ -1,22 +1,22 @@
 package gitlet;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static gitlet.Utils.*;
 
 class StagingArea implements Serializable {
-    private HashMap<String,Blob> previousTree;
-    private final HashMap<String,Blob> workingTree;
+    public static final String STAGING_AREA_FILENAME = Repository.STAGING_AREA_FILENAME;
+
+    private HashMap<String,Blob> prevTree;
+    private HashMap<String,Blob> workTree;
 
     StagingArea(){
-        previousTree = new HashMap<>();
-        workingTree = new HashMap<>();
+        prevTree = new HashMap<>();
+        workTree = new HashMap<>();
     }
 
     void add(String name){
@@ -24,8 +24,8 @@ class StagingArea implements Serializable {
             return;
         }
         File src = join(Repository.CWD, name);
-        Blob prev = workingTree.get(name);
-        workingTree.put(name,Blob.push(src));
+        Blob prev = workTree.get(name);
+        workTree.put(name,Blob.push(src));
         if (prev != null) {
             prev.pop();
         }
@@ -45,28 +45,53 @@ class StagingArea implements Serializable {
             return;
         }
         File src = join(Repository.CWD, name);
-        Blob prev = workingTree.get(name);
-        if (prev.getHash().equals(sha1(readContents(src)))) {
-            workingTree.put(name,null);
-            prev.pop();
+        Blob working = workTree.get(name);
+        if (working.getHash().equals(sha1(readContents(src)))) {
+            workTree.put(name,null);
+            working.pop();
             src.delete();
         }else{
-            Blob last = previousTree.get(name);
-            workingTree.put(name,last);
-            prev.pop();
-            last.ref();
+            Blob prev = prevTree.get(name);
+            workTree.put(name, prev);
+            working.pop();
+            prev.ref();
         }
+    }
+
+    //reset a file content to a blob
+    void reset(String name,Blob blob){
+        if(name == null) {
+            return;
+        }
+        File src = join(Repository.CWD, name);
+        Blob working = workTree.get(name);
+        if(blob == null){
+            blob = prevTree.get(name);
+        }
+        workTree.put(name,blob);
+        working.pop();
+        blob.ref();
+        writeContents(src,blob.content());
     }
 
     boolean contains(String name){
-        return name != null && workingTree.containsKey(name);
+        return name != null && workTree.containsKey(name);
     }
 
-    Commit toCommit(String message, String parent, Date timestamp) throws IOException {
-        previousTree = new HashMap<>(workingTree);
-        for(Blob f : workingTree.values()) {
+    Commit toCommit(String message, String parent, Date timestamp) {
+        prevTree = new HashMap<>(workTree);
+        for(Blob f : workTree.values()) {
             f.ref();
         }
-        return new Commit(message, parent, timestamp, workingTree);
+        return new Commit(message, parent, timestamp, workTree);
+    }
+
+    static StagingArea load(){
+        return readObject(join(Repository.GITLET_DIR,STAGING_AREA_FILENAME)
+                ,StagingArea.class);
+    }
+
+    void dump(){
+        writeObject(join(Repository.GITLET_DIR,STAGING_AREA_FILENAME),this);
     }
 }

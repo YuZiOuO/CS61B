@@ -29,16 +29,18 @@ public class Repository implements Serializable {
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
     public static final String REPO_FILENAME = "repo";
+    public static final String STAGING_AREA_FILENAME = "staged";
     public static final String INITIAL_COMMIT_MESSAGE = "initial commit";
 
     private String currentBranch;
 
-    private Map<String, String> refs;
+    private final Map<String, String> refs;
 
-    private TreeSet<String> commitTree;
+    private final TreeSet<String> commitTree;
 
     private File pathOfCommit;
 
+    //cache before dump
     StagingArea stagingArea;
 
     public Repository() throws IOException {
@@ -47,7 +49,7 @@ public class Repository implements Serializable {
         commitTree = new TreeSet<>();
         stagingArea = new StagingArea();
         stagingArea.addAll();
-        if(Commit.COMMIT_DIR.mkdirs()) {
+        if(Commit.COMMIT_DIR.mkdirs() && Blob.BLOB_DIR.mkdirs()) {
             commit(INITIAL_COMMIT_MESSAGE, Date.from(Instant.EPOCH));
         }
     }
@@ -61,15 +63,40 @@ public class Repository implements Serializable {
     }
 
     static Repository load(File file) {
-        return readObject(file, Repository.class);
-    };
+        Repository repo = readObject(file, Repository.class);
+        repo.stagingArea = StagingArea.load();
+        return repo;
+    }
 
     void dump(){
+        stagingArea.dump();
+        stagingArea = null;
         writeObject(join(GITLET_DIR,REPO_FILENAME),this);
-    };
+    }
 
     Commit HEAD(){
-        File path = join(Commit.COMMIT_DIR,refs.get(currentBranch));
-        return Commit.load(path);
+        return Commit.load(refs.get(currentBranch));
+    }
+
+    void checkoutResetFile(String name){
+        stagingArea.reset(name,null);
+    }
+    int checkoutCherryPickFile(String commit,String name){
+        if(commitTree.contains(commit)){
+            Commit c = Commit.load(commit);
+            if(c.contain(name)){
+                Blob b = c.getBlob(name);
+                stagingArea.reset(name,b);
+                return 0;
+            }
+            return 1;
+        }
+        return 2;
+    }
+    void checkoutBranch(String branch){
+        if(refs.containsKey(branch)){
+            currentBranch = branch;
+        }
+        // TODO: implementation
     }
 }
