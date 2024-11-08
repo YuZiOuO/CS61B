@@ -14,11 +14,10 @@ import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Set;
 
 
 /** Assorted utilities.
@@ -239,8 +238,40 @@ class Utils {
         System.out.println();
     }
 
+    //O(n) TODO:optimization
 
-    static Date now(){
-        return Date.from(Instant.now());
+    /**
+     * find if any hash in Set {@code target} matches the given substring hash.
+     * A naive implementation with asymptotic O(n)
+     *
+     * @param source @NotNull the substring hash.
+     * @param target the set where the corresponding hash to be found.
+     * @return null if nothing in {@code target} matches,otherwise the corresponding hash.
+     */
+    static String findCompleteHash(String source, Set<String> target){
+        for(String s : target){
+            if(matchHash(source, s)){
+                return s;
+            }
+        }
+        return null;
     }
+
+    /**
+     * Check if the hash {@code source} equals the hash {@code target}
+     * i.e. if {@code source} equals any of {@code target}'s front substring.
+     *
+     * @param source @NotNull the source hash substring with more than 6 characters.
+     * @param target @NotNull the target hash.
+     * @return true if matches and {@code source.length() > 6},otherwise false.
+     */
+    static boolean matchHash(String source, String target) {
+        int length = source.length();
+        if (length < 6) {
+            return false;
+        }
+        String sub = target.substring(0, length);
+        return sub.equals(source);
+    }
+
 }

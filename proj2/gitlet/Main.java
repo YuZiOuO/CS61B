@@ -36,6 +36,15 @@ public class Main {
                     Handler.checkout(args[1],args[2],args[3]);
                 }
                 break;
+            case "branch":
+                Handler.branch(args[1]);
+                break;
+            case "rm-branch":
+                Handler.rmBranch(args[1]);
+                break;
+            case "log":
+                Handler.log();
+                break;
         }
     }
 }

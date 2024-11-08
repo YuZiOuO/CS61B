@@ -16,24 +16,34 @@ import static gitlet.Utils.*;
 public class Commit implements Serializable {
     static File COMMIT_DIR = Utils.join(Repository.GITLET_DIR, "commit");
 
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Commit class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided one example for `message`.
-     */
+    public String getMessage() {
+        return message;
+    }
 
     /**
      * The message of this Commit.
      */
     private final String message;
 
+    public String getParent() {
+        return parent;
+    }
+
     private final String parent;
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
 
     private final Date timestamp;
 
     private final Map<String, String> files;
+
+    public String getHash() {
+        return hash;
+    }
+
+    private final String hash;
 
     /* 直接提取StagingArea中的文件 */
     Commit(String message, String parent, Date timestamp, Map<String, Blob> files){
@@ -41,14 +51,24 @@ public class Commit implements Serializable {
         this.parent = parent;
         this.timestamp = timestamp;
         this.files = cache(files);
+        this.hash = sha1(this.toString());
     }
 
+    /**
+     * Load a commit with given hash.
+     * The corresponding {@code Commit} mush been dumped in advance,
+     *
+     * @param hash the commit hash.
+     * @throws IllegalArgumentException if the corresponding commit files
+     * does not exist or can't be read.
+     * @return null if {@code hash == null},otherwise the corresponding {@code Commit}.
+     */
     static Commit load(String hash) {
-        return Utils.readObject(join(COMMIT_DIR,hash), Commit.class);
+        return hash == null?null:Utils.readObject(join(COMMIT_DIR,hash), Commit.class);
     }
 
     void dump() {
-        Utils.writeObject(Utils.join(COMMIT_DIR, sha1(this.toString())), this);
+        Utils.writeObject(Utils.join(COMMIT_DIR, hash), this);
     }
 
     private Map<String, String> cache(Map<String, Blob> files){
@@ -85,5 +105,15 @@ public class Commit implements Serializable {
             dest.put(filename,b);
         }
         return dest;
+    }
+
+    Commit findParent(Commit from,String target){
+        // Note: load() invokes Utils.readObjects,which throws an error if the file does not exist.
+        if(this.equals(from)) return this;
+        if(this.parent == null) return null;
+        if(matchHash(target, this.parent)){
+            return Commit.load(this.parent);
+        }
+        return findParent(Commit.load(this.parent),target);
     }
 }

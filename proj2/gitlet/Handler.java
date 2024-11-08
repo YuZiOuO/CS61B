@@ -2,6 +2,8 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 import static gitlet.Utils.*;
@@ -36,7 +38,7 @@ public class Handler {
 
     static void commit(String message) throws IOException {
         Repository repo = loadRepository();
-        repo.commit(message, now());
+        repo.commit(message, Date.from(Instant.now()));
         repo.dump();
     }
 
@@ -52,6 +54,9 @@ public class Handler {
     }
 
     static void log() {
+        Repository repo = loadRepository();
+        System.out.println(repo.log());
+        repo.dump();
     }
 
     static void globalLog() {
@@ -101,9 +106,25 @@ public class Handler {
     }
 
     static void branch(String name) {
+        Repository repo = loadRepository();
+        if(repo.branchExists(name)){
+            System.out.println("A branch with that name already exists.");
+        }else{
+            repo.createBranch(name);
+        }
+        repo.dump();
     }
 
     static void rmBranch(String name) {
+        Repository repo = loadRepository();
+        if(!repo.branchExists(name)){
+            System.out.println("A branch with that name does not exist.");
+        }else if(name.equals(repo.getCurrentBranch())){
+            System.out.println("Cannot remove the current branch.");
+        }else{
+            repo.removeBranch(name);
+        }
+        repo.dump();
     }
 
     static void reset(String hash) {

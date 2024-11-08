@@ -53,8 +53,8 @@ public class Repository implements Serializable {
     }
 
     public void commit(String message, Date timestamp) throws IOException {
-        Commit c = stagingArea.toCommit(message,currentBranch,timestamp);
-        entry = sha1(c.toString());
+        Commit c = stagingArea.toCommit(message,refs.get(currentBranch),timestamp);
+        entry = c.getHash();
         refs.put(currentBranch, entry);
         commitTree.add(entry);
         c.dump();
@@ -105,7 +105,8 @@ public class Repository implements Serializable {
      * @return 0 for success, 1 if file does not exist, and 2 if commit does not exist.
      */
     int checkoutCherryPickFile(String commit,String name){
-        if(commitTree.contains(commit)){
+        commit = findCompleteHash(commit,commitTree);
+        if(commit != null){
             Commit c = Commit.load(commit);
             if(c.contain(name)){
                 Blob b = c.getBlob(name);
@@ -133,15 +134,46 @@ public class Repository implements Serializable {
                 return 3;
             }
             currentBranch = branch;
-            stagingArea.setTree(Commit.convertToBlobTree(refs.get(branch)));
+            Map<String,Blob> newWorkTree = Commit.convertToBlobTree(refs.get(branch));
+            stagingArea.setTree(newWorkTree);
             List<String> allFiles = plainFilenamesIn(CWD);
             if (allFiles != null) {
                 for(String f : allFiles){
-                    stagingArea.reset(f,null);
+                    File file = join(CWD,f);
+                    file.delete();
                 }
+            }
+            for(String f:newWorkTree.keySet()){
+                stagingArea.reset(f,null);
             }
             return 0;
         }
         return 1;
+    }
+
+    void createBranch(String name){
+        refs.put(name,refs.get(currentBranch));
+    }
+    boolean branchExists(String branch){
+        return refs.containsKey(branch);
+    }
+    String removeBranch(String name){
+        return refs.remove(name);
+    }
+    String getCurrentBranch(){
+        return currentBranch;
+    }
+
+    String log(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb, Locale.US);
+        Commit c = Commit.load(refs.get(currentBranch));
+        while(c != null){
+            f.format("===\ncommit ").format(c.getHash()).format("\nDate: ")
+                    .format("%1$ta %1$tb %1$td %1$tT %1$tY %1$tz\n",c.getTimestamp())
+                    .format(c.getMessage()).format("\n\n");
+            c = Commit.load(c.getParent());
+        }
+        return sb.toString();
     }
 }
