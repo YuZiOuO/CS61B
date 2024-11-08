@@ -16,9 +16,9 @@ class StagingArea implements Serializable {
     private Map<String,Blob> workTree;
 
     //for checkout
-    public void setTree(Map<String, Blob> Tree) {
-        this.prevTree = Tree;
-        this.workTree = Tree;
+    public void setTree(Map<String, Blob> tree) {
+        this.prevTree = tree;
+        this.workTree = tree;
     }
 
     StagingArea(){

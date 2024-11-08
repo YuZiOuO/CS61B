@@ -34,7 +34,7 @@ public class Repository implements Serializable {
     //maps ref name to commit hash
     private final Map<String, String> refs;
 
-    private final Set<String> commitTree;
+    private final Set<String> commits;
 
     private String entry;
 
@@ -44,7 +44,7 @@ public class Repository implements Serializable {
     public Repository() throws IOException {
         refs = new TreeMap<>();
         currentBranch = "master";
-        commitTree = new TreeSet<>();
+        commits = new TreeSet<>();
         stagingArea = new StagingArea();
         stagingArea.addAll();
         if(Commit.COMMIT_DIR.mkdirs() && Blob.BLOB_DIR.mkdirs()) {
@@ -56,7 +56,7 @@ public class Repository implements Serializable {
         Commit c = stagingArea.toCommit(message,refs.get(currentBranch),timestamp);
         entry = c.getHash();
         refs.put(currentBranch, entry);
-        commitTree.add(entry);
+        commits.add(entry);
         c.dump();
     }
 
@@ -105,7 +105,7 @@ public class Repository implements Serializable {
      * @return 0 for success, 1 if file does not exist, and 2 if commit does not exist.
      */
     int checkoutCherryPickFile(String commit,String name){
-        commit = findCompleteHash(commit,commitTree);
+        commit = findCompleteHash(commit, commits);
         if(commit != null){
             Commit c = Commit.load(commit);
             if(c.contain(name)){
@@ -166,13 +166,40 @@ public class Repository implements Serializable {
 
     String log(){
         StringBuilder sb = new StringBuilder();
-        Formatter f = new Formatter(sb, Locale.US);
         Commit c = Commit.load(refs.get(currentBranch));
         while(c != null){
-            f.format("===\ncommit ").format(c.getHash()).format("\nDate: ")
-                    .format("%1$ta %1$tb %1$td %1$tT %1$tY %1$tz\n",c.getTimestamp())
-                    .format(c.getMessage()).format("\n\n");
+            sb.append(c.toLog());
             c = Commit.load(c.getParent());
+        }
+        return sb.toString();
+    }
+
+    String globalLog(){
+        List<String> commits = plainFilenamesIn(Commit.COMMIT_DIR);
+        StringBuilder sb = new StringBuilder();
+        if (commits != null) {
+            for(String n:commits){
+                sb.append(Commit.load(n).toLog());
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Search in all commits,return a string of hash that
+     * all of its corresponding commits have a message
+     * contain the substring {@code string}
+     * @param string the string to find.
+     * @return string containing hash.
+     */
+    String find(String string){
+        StringBuilder sb = new StringBuilder();
+        for(String commit: commits){
+            Commit c = Commit.load(commit);
+            String msg = c.getMessage();
+            if(msg.contains(string)){
+                sb.append(c.getHash());
+            }
         }
         return sb.toString();
     }

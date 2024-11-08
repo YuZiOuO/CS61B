@@ -60,10 +60,15 @@ public class Handler {
     }
 
     static void globalLog() {
+        Repository repo = loadRepository();
+        System.out.println(repo.globalLog());
+        repo.dump();
     }
 
     static void find(String message) {
-
+        Repository repo = loadRepository();
+        System.out.println(repo.find(message));
+        repo.dump();
     }
 
     static void status() {

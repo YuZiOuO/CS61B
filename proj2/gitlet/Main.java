@@ -45,6 +45,12 @@ public class Main {
             case "log":
                 Handler.log();
                 break;
+            case "global-log":
+                Handler.globalLog();
+                break;
+            case "find":
+                Handler.find(args[1]);
+                break;
         }
     }
 }

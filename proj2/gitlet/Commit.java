@@ -8,8 +8,6 @@ import static gitlet.Utils.*;
 
 /**
  * Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
  *
  * @author CYZ
  */
@@ -96,6 +94,15 @@ public class Commit implements Serializable {
                 +"\nfiles:"+files.toString();
     }
 
+    String toLog(){
+        StringBuilder sb = new StringBuilder();
+        Formatter f = new Formatter(sb, Locale.US);
+        f.format("===\ncommit ").format(this.getHash()).format("\nDate: ")
+                .format("%1$ta %1$tb %1$td %1$tT %1$tY %1$tz\n",this.getTimestamp())
+                .format(this.getMessage()).format("\n\n");
+        return sb.toString();
+    }
+
     //for checkout
     static Map<String,Blob> convertToBlobTree(String hash){
         Map<String,String> src = Commit.load(hash).files;
@@ -116,4 +123,7 @@ public class Commit implements Serializable {
         }
         return findParent(Commit.load(this.parent),target);
     }
+
+
+
 }
