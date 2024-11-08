@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -74,14 +75,16 @@ public class Handler {
     static void status() {
     }
 
-    static void checkout(String arg1, String arg2, String arg3) {
+    static void checkout(String[] arg) {
         Repository repo = loadRepository();
-        if (arg1.equals("--")) {
-            if (repo.checkoutResetFile(arg2) == 1) {
+        if (arg.length == 2) {
+            if (repo.checkoutResetFile((String) Array.get(arg,1)) == 1) {
                 System.out.println("File does not exist in that commit.");
             }
-        } else if (arg2.equals("--")) {
-            int result = repo.checkoutCherryPickFile(arg1, arg3);
+        } else if (arg.length == 3) {
+            int result = repo.checkoutCherryPickFile(
+                    (String) Array.get(arg,0),
+                    (String) Array.get(arg,2));
             switch (result) {
                 case 1:
                     System.out.println("File does not exist in that commit.");
@@ -91,7 +94,7 @@ public class Handler {
                     break;
             }
         } else {
-            int result = repo.checkoutBranch(arg1);
+            int result = repo.checkoutBranch((String) Array.get(arg,0));
             switch (result) {
                 case 1:
                     System.out.println("No such branch exists.");

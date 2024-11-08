@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
  *  @author CYZ
@@ -30,11 +31,7 @@ public class Main {
                 break;
             case "checkout":
                 // TODO:if args are invalid.
-                if(args.length == 3) {
-                    Handler.checkout(args[1],args[2],null);
-                }else{
-                    Handler.checkout(args[1],args[2],args[3]);
-                }
+                Handler.checkout(Arrays.copyOfRange(args, 1, args.length));
                 break;
             case "branch":
                 Handler.branch(args[1]);

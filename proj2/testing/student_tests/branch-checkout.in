@@ -1,0 +1,28 @@
+I definitions.inc
+
+> init
+<<<
+
++ wug.txt wug.txt
+
+> add wug.txt
+<<<
+> commit "first commit"
+<<<
+> branch newbranch
+<<<
+> checkout newbranch
+<<<
+
++ wug1.txt wug1.txt
+
+> add wug1.txt
+<<<
+> commit "newbranch commit"
+<<<
+> checkout master
+<<<
+
+* wug1.txt
+= wug.txt wug.txt
+

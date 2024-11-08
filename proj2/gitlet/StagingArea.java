@@ -105,7 +105,13 @@ class StagingArea implements Serializable {
 
     //O(n)
     boolean allFilesTracked(){
-        List<String> allFiles = plainFilenamesIn(Repository.GITLET_DIR);
+        for(Blob b: workTree.values()){
+            if(b == null){
+                //check if any files is staged for removal
+                return false;
+            }
+        }
+        List<String> allFiles = plainFilenamesIn(Repository.CWD);
         if(allFiles == null){
             return prevTree.isEmpty();
         }
