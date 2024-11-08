@@ -29,7 +29,12 @@ public class Main {
                 Handler.rm(args[1]);
                 break;
             case "checkout":
-                Handler.checkout(args[1],args[2],null); //TODO
+                // TODO:if args are invalid.
+                if(args.length == 3) {
+                    Handler.checkout(args[1],args[2],null);
+                }else{
+                    Handler.checkout(args[1],args[2],args[3]);
+                }
                 break;
         }
     }

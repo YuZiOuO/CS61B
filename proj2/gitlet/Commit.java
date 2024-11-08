@@ -75,4 +75,15 @@ public class Commit implements Serializable {
         return "Commit@"+timestamp.toString()+"\nmessage:"+message+"\nparent:"+parent
                 +"\nfiles:"+files.toString();
     }
+
+    //for checkout
+    static Map<String,Blob> convertToBlobTree(String hash){
+        Map<String,String> src = Commit.load(hash).files;
+        Map<String,Blob> dest = new HashMap<>();
+        for(String filename: src.keySet()) {
+            Blob b = Blob.load(src.get(filename));
+            dest.put(filename,b);
+        }
+        return dest;
+    }
 }

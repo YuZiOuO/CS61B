@@ -65,14 +65,37 @@ public class Handler {
     }
 
     static void checkout(String arg1, String arg2, String arg3) {
-        // TODO: args checking.
         Repository repo = loadRepository();
         if (arg1.equals("--")) {
-            repo.checkoutResetFile(arg2);
+            if (repo.checkoutResetFile(arg2) == 1) {
+                System.out.println("File does not exist in that commit.");
+            }
         } else if (arg2.equals("--")) {
-            repo.checkoutCherryPickFile(arg1, arg3);
+            int result = repo.checkoutCherryPickFile(arg1, arg3);
+            switch (result) {
+                case 1:
+                    System.out.println("File does not exist in that commit.");
+                    break;
+                case 2:
+                    System.out.println("No commit with that id exists.");
+                    break;
+            }
         } else {
-            //TODO
+            int result = repo.checkoutBranch(arg1);
+            switch (result) {
+                case 1:
+                    System.out.println("No such branch exists.");
+                    break;
+                case 2:
+                    System.out.println(
+                            "No need to checkout the current branch.");
+                    break;
+                case 3:
+                    System.out.println(
+                            "There is an untracked file in the way; " +
+                                    "delete it, or add and commit it first.");
+                    break;
+            }
         }
         repo.dump();
     }

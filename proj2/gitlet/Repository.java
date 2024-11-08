@@ -4,10 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.Date;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -34,11 +31,12 @@ public class Repository implements Serializable {
 
     private String currentBranch;
 
+    //maps ref name to commit hash
     private final Map<String, String> refs;
 
-    private final TreeSet<String> commitTree;
+    private final Set<String> commitTree;
 
-    private File pathOfCommit;
+    private String entry;
 
     //cache before dump
     StagingArea stagingArea;
@@ -56,9 +54,9 @@ public class Repository implements Serializable {
 
     public void commit(String message, Date timestamp) throws IOException {
         Commit c = stagingArea.toCommit(message,currentBranch,timestamp);
-        String hash = sha1(c.toString());
-        refs.put(currentBranch, hash);
-        commitTree.add(hash);
+        entry = sha1(c.toString());
+        refs.put(currentBranch, entry);
+        commitTree.add(entry);
         c.dump();
     }
 
@@ -74,13 +72,38 @@ public class Repository implements Serializable {
         writeObject(join(GITLET_DIR,REPO_FILENAME),this);
     }
 
+    /**
+     * return the latest commit of the currentBranch.
+     *
+     * @return a Commit.
+     */
     Commit HEAD(){
         return Commit.load(refs.get(currentBranch));
     }
 
-    void checkoutResetFile(String name){
+    /**
+     * Reset the file with given name to the last commited version.
+     *
+     * @param name The filename to reset.
+     * @return 0 for success, 1 if the given file is untracked.
+     */
+    int checkoutResetFile(String name){
+        Commit c = Commit.load(refs.get(currentBranch));
+        if(!c.contain(name)){
+            return 1;
+        }
         stagingArea.reset(name,null);
+        return 0;
     }
+
+    /**
+     * Cherry-pick the given file in given commit to CWD, overwrite the currently
+     * existing one.
+     *
+     * @param commit The commit which the file to be extracted from.
+     * @param name The file name.
+     * @return 0 for success, 1 if file does not exist, and 2 if commit does not exist.
+     */
     int checkoutCherryPickFile(String commit,String name){
         if(commitTree.contains(commit)){
             Commit c = Commit.load(commit);
@@ -93,10 +116,32 @@ public class Repository implements Serializable {
         }
         return 2;
     }
-    void checkoutBranch(String branch){
-        if(refs.containsKey(branch)){
-            currentBranch = branch;
+
+    /**
+     * Checkout to the given branch, clear all files in CWD and replace with corresponding files
+     * contained in the last commit of the given branch.
+     *
+     * @param branch The branch to checkout.
+     * @return 0 for success, 1 if branch does not exist, 2 for no need to checkout,3 for untracked files;
+     */
+    int checkoutBranch(String branch){
+        if(currentBranch.equals(branch)){
+            return 2;
         }
-        // TODO: implementation
+        if(refs.containsKey(branch)){
+            if(!stagingArea.allFilesTracked()){
+                return 3;
+            }
+            currentBranch = branch;
+            stagingArea.setTree(Commit.convertToBlobTree(refs.get(branch)));
+            List<String> allFiles = plainFilenamesIn(CWD);
+            if (allFiles != null) {
+                for(String f : allFiles){
+                    stagingArea.reset(f,null);
+                }
+            }
+            return 0;
+        }
+        return 1;
     }
 }

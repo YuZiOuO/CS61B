@@ -5,14 +5,21 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static gitlet.Utils.*;
 
 class StagingArea implements Serializable {
     public static final String STAGING_AREA_FILENAME = Repository.STAGING_AREA_FILENAME;
 
-    private HashMap<String,Blob> prevTree;
-    private HashMap<String,Blob> workTree;
+    private Map<String,Blob> prevTree;
+    private Map<String,Blob> workTree;
+
+    //for checkout
+    public void setTree(Map<String, Blob> Tree) {
+        this.prevTree = Tree;
+        this.workTree = Tree;
+    }
 
     StagingArea(){
         prevTree = new HashMap<>();
@@ -59,6 +66,7 @@ class StagingArea implements Serializable {
     }
 
     //reset a file content to a blob
+    //if blob == null , set to blob in current version
     void reset(String name,Blob blob){
         if(name == null) {
             return;
@@ -93,5 +101,21 @@ class StagingArea implements Serializable {
 
     void dump(){
         writeObject(join(Repository.GITLET_DIR,STAGING_AREA_FILENAME),this);
+    }
+
+    //O(n)
+    boolean allFilesTracked(){
+        List<String> allFiles = plainFilenamesIn(Repository.GITLET_DIR);
+        if(allFiles == null){
+            return prevTree.isEmpty();
+        }
+        for(String filename : allFiles) {
+            Blob blob = prevTree.get(filename);
+            File src = join(Repository.CWD, filename);
+            if(blob == null || !blob.getHash().equals(sha1(readContents(src)))){
+                return false;
+            }
+        }
+        return true;
     }
 }
