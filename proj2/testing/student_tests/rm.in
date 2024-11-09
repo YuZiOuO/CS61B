@@ -1,0 +1,39 @@
+I definitions.inc
+
+> init
+<<<
+
++ wug.txt wug.txt
++ wug1.txt wug1.txt
+
+> add wug.txt
+<<<
+> add wug1.txt
+<<<
+> commit "first commit"
+<<<
+
+# neither staged or tracked
+> rm notStagedOrTracked.txt
+No reason to remove the file.
+<<<
+
+# staged -wug.txt
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+= wug.txt notwug.txt
+> rm wug.txt
+<<<
+E wug.txt
+= wug.txt wug.txt
+
+# tracked -wug1.txt
+E wug1.txt
+> rm wug1.txt
+<<<
+* wug1.txt
+> add wug1.txt
+<<<
+E wug1.txt
+= wug1.txt wug1.txt

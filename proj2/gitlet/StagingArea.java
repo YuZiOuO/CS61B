@@ -103,22 +103,22 @@ class StagingArea implements Serializable {
         writeObject(join(Repository.GITLET_DIR,STAGING_AREA_FILENAME),this);
     }
 
-    //O(n)
     boolean allFilesTracked(){
-        for(Blob b: workTree.values()){
-            if(b == null){
-                //check if any files is staged for removal
-                return false;
-            }
-        }
         List<String> allFiles = plainFilenamesIn(Repository.CWD);
         if(allFiles == null){
             return prevTree.isEmpty();
+        }else{
+            //check if all files are added
+            for(String filename : allFiles) {
+                if(!workTree.containsKey(filename)) {
+                    return false;
+                }
+            }
         }
-        for(String filename : allFiles) {
-            Blob blob = prevTree.get(filename);
-            File src = join(Repository.CWD, filename);
-            if(blob == null || !blob.getHash().equals(sha1(readContents(src)))){
+        for(String filename : workTree.keySet()) {
+            if(workTree.get(filename) == null ||
+                    !workTree.get(filename).getHash().equals(
+                            prevTree.get(filename).getHash())){
                 return false;
             }
         }

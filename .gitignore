@@ -9,6 +9,7 @@
 !library-sp21
 !foods.csv
 !README.md
+!**.in
 *.class
 *.log
 *.ctxt
