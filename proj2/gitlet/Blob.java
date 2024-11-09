@@ -51,11 +51,9 @@ class Blob extends File {
         return buf;
     }
 
-    //filesystem
     static Blob load(String hash){
         return readObject(join(BLOB_DIR,hash),Blob.class);
     }
-
     void dump(){
         writeObject(join(BLOB_DIR,hash),this);
     }
