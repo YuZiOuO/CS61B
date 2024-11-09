@@ -18,7 +18,6 @@ class Blob extends File {
         refs = 1;
     }
 
-    //stagingArea
     static Blob push(File f){
         String hash = sha1(readContents(f));
         File blob = new File(BLOB_DIR,hash);

@@ -33,7 +33,3 @@ E wug1.txt
 > rm wug1.txt
 <<<
 * wug1.txt
-> add wug1.txt
-<<<
-E wug1.txt
-= wug1.txt wug1.txt

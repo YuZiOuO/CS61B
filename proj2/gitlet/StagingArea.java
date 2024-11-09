@@ -13,6 +13,8 @@ class StagingArea implements Serializable {
     public static final String STAGING_AREA_FILENAME = Repository.STAGING_AREA_FILENAME;
 
     private Map<String,Blob> prevTree;
+
+    //TODO: refactor workTree.put() to 2 methods
     private Map<String,Blob> workTree;
 
     //for checkout
@@ -51,18 +53,18 @@ class StagingArea implements Serializable {
         if(name == null) {
             return;
         }
-        File src = join(Repository.CWD, name);
+        File file = join(Repository.CWD, name);
+        Blob prev = prevTree.get(name);
         Blob working = workTree.get(name);
-        if (working.getHash().equals(sha1(readContents(src)))) {
+        if (working.getHash().equals(prev.getHash())) {
             workTree.put(name,null);
-            working.pop();
-            src.delete();
+            file.delete();
         }else{
-            Blob prev = prevTree.get(name);
             workTree.put(name, prev);
-            working.pop();
+            writeContents(file,prev.content());
             prev.ref();
         }
+        working.pop();
     }
 
     //reset a file content to a blob
