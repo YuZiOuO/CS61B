@@ -1,0 +1,11 @@
+> init
+<<<
+
+> add nonexistfile.txt
+File does not exist.
+<<<
+* nonexistfile.txt
+
+> commit "try to commit"
+No changes added to the commit.
+<<<

@@ -130,7 +130,7 @@ public class Repository implements Serializable {
             return 2;
         }
         if(refs.containsKey(branch)){
-            if(!stagingArea.allFilesTracked()){
+            if(!stagingArea.workTreeClean()){
                 return 3;
             }
             currentBranch = branch;

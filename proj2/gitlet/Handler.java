@@ -31,14 +31,26 @@ public class Handler {
         StagingArea staging = repo.stagingArea;
         if(staging.stagedForRemoval(name)){
             staging.restore(name);
+        }else{
+            File f = join(CWD,name);
+            if(!f.exists()){
+                System.out.println("File does not exist.");
+                return;
+            }
         }
         staging.add(name);
         repo.dump();
     }
 
     static void commit(String message) throws IOException {
-        // TODO:failure cases.
         Repository repo = loadRepository();
+        if(repo.stagingArea.workTreeClean()){
+            System.out.println("No changes added to the commit.");
+            return;
+        }
+        if(message.isEmpty()){
+            System.out.println("Please enter a commit message.");
+        }
         repo.commit(message, Date.from(Instant.now()));
         repo.dump();
     }
