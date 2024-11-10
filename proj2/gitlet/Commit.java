@@ -35,6 +35,10 @@ public class Commit implements Serializable {
 
     private final Date timestamp;
 
+    public Map<String, String> getFiles() {
+        return files;
+    }
+
     private final Map<String, String> files;
 
     public String getHash() {

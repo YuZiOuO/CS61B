@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.time.Instant;
 import java.util.Date;
-import java.util.List;
 
 import static gitlet.Utils.*;
 
@@ -29,15 +28,16 @@ public class Handler {
 
     static void add(String name) {
         Repository repo = loadRepository();
-        List<String> allFiles = plainFilenamesIn(CWD);
-        if (allFiles != null && !allFiles.contains(name)) {
-            System.out.println("File does not exist.");
+        StagingArea staging = repo.stagingArea;
+        if(staging.stagedForRemoval(name)){
+            staging.restore(name);
         }
-        repo.stagingArea.add(name);
+        staging.add(name);
         repo.dump();
     }
 
     static void commit(String message) throws IOException {
+        // TODO:failure cases.
         Repository repo = loadRepository();
         repo.commit(message, Date.from(Instant.now()));
         repo.dump();

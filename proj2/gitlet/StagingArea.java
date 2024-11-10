@@ -9,29 +9,39 @@ import java.util.Map;
 
 import static gitlet.Utils.*;
 
+// the abstract of CWD and stagingArea Files.
 class StagingArea implements Serializable {
     public static final String STAGING_AREA_FILENAME = Repository.STAGING_AREA_FILENAME;
 
-    private Map<String,Blob> prevTree;
+    private String prevCommitHash;
     private Map<String,Blob> workTree;
 
     //for checkout
-    public void setTree(Map<String, Blob> tree) {
-        this.prevTree = tree;
-        this.workTree = tree;
+    public void checkout(String commitHash) {
+        Commit c = Commit.load(commitHash);
+        this.prevCommitHash = c.getParent();
+        this.workTree = Commit.convertToBlobTree(c.getHash());
+        List<String> allFiles = plainFilenamesIn(Repository.CWD);
+        for(String file : allFiles) {
+            File f = join(Repository.CWD, file);
+            f.delete();
+        }
+        for(String file : workTree.keySet()) {
+            restore(file);
+        }
     }
 
     StagingArea(){
-        prevTree = new HashMap<>();
+        prevCommitHash = null;
         workTree = new HashMap<>();
     }
 
     void add(String name){
         File src = join(Repository.CWD, name);
-        Blob prev = workTree.get(name);
+        Blob working = workTree.get(name);
         workTree.put(name,Blob.push(src));
-        if (prev != null) {
-            prev.pop();
+        if (working != null) {
+            working.pop();
         }
     }
 
@@ -44,14 +54,17 @@ class StagingArea implements Serializable {
         }
     }
 
+    // if
     void remove(String name){
         File file = join(Repository.CWD, name);
-        Blob prev = prevTree.get(name);
+        Blob prev = Commit.load(prevCommitHash).getBlob(name);
         Blob working = workTree.get(name);
         if (working.getHash().equals(prev.getHash())) {
+            // tracked and not modified
             workTree.put(name,null);
             file.delete();
         }else{
+            // modified
             workTree.put(name, prev);
             writeContents(file,prev.content());
             prev.ref();
@@ -60,29 +73,37 @@ class StagingArea implements Serializable {
     }
 
     //reset a file content to a blob
-    //if blob == null , set to blob in current version
+    //if blob == null, set to blob in current tracked version
     void reset(String name,Blob blob){
-        File src = join(Repository.CWD, name);
-        Blob working = workTree.get(name);
+        File dest = join(Repository.CWD, name);
+        workTree.get(name).pop();
         if(blob == null){
-            blob = prevTree.get(name);
+            Commit prev = Commit.load(prevCommitHash);
+            blob = Blob.load(prev.getFiles().get(name));
         }
         workTree.put(name,blob);
-        working.pop();
         blob.ref();
-        writeContents(src,blob.content());
+        writeContents(dest,blob.content());
     }
 
-    boolean contains(String name){
-        return name != null && workTree.containsKey(name);
+    //reset a file content to the staged version
+    void restore(String filename){
+        File dest = join(Repository.CWD, filename);
+        Blob working = workTree.get(filename);
+        writeContents(dest,working.content());
+    }
+
+    boolean contains(String filename){
+        return filename != null && workTree.containsKey(filename);
     }
 
     Commit toCommit(String message, String parent, Date timestamp) {
-        prevTree = new HashMap<>(workTree);
+        Commit c = new Commit(message, parent, timestamp, workTree);
         for(Blob f : workTree.values()) {
             f.ref();
         }
-        return new Commit(message, parent, timestamp, workTree);
+        prevCommitHash = c.getHash();
+        return c;
     }
 
     static StagingArea load(){
@@ -96,10 +117,13 @@ class StagingArea implements Serializable {
 
     boolean allFilesTracked(){
         List<String> allFiles = plainFilenamesIn(Repository.CWD);
+        Commit prev = Commit.load(prevCommitHash);
+        Map<String,String> prevFiles = prev.getFiles();
         if(allFiles == null){
-            return prevTree.isEmpty();
+            // only does the root commit has no files
+            return prev.getParent() == null;
         }else{
-            //check if all files are added
+            // check if all files are added
             for(String filename : allFiles) {
                 if(!workTree.containsKey(filename)) {
                     return false;
@@ -109,10 +133,15 @@ class StagingArea implements Serializable {
         for(String filename : workTree.keySet()) {
             if(workTree.get(filename) == null ||
                     !workTree.get(filename).getHash().equals(
-                            prevTree.get(filename).getHash())){
+                            prevFiles.get(filename))){
                 return false;
             }
         }
         return true;
+    }
+
+    boolean stagedForRemoval(String filename){
+        Commit prev = Commit.load(prevCommitHash);
+        return prev.contain(filename) && workTree.get(filename) == null;
     }
 }

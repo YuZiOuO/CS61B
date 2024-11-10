@@ -134,18 +134,7 @@ public class Repository implements Serializable {
                 return 3;
             }
             currentBranch = branch;
-            Map<String,Blob> newWorkTree = Commit.convertToBlobTree(refs.get(branch));
-            stagingArea.setTree(newWorkTree);
-            List<String> allFiles = plainFilenamesIn(CWD);
-            if (allFiles != null) {
-                for(String f : allFiles){
-                    File file = join(CWD,f);
-                    file.delete();
-                }
-            }
-            for(String f:newWorkTree.keySet()){
-                stagingArea.reset(f,null);
-            }
+            stagingArea.checkout(refs.get(branch));
             return 0;
         }
         return 1;
