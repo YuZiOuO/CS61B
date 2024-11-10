@@ -45,15 +45,6 @@ class StagingArea implements Serializable {
         }
     }
 
-    void addAll(){
-        List<String> allFiles = plainFilenamesIn(Repository.CWD);
-        if (allFiles != null) {
-            for (String filename : allFiles) {
-                this.add(filename);
-            }
-        }
-    }
-
     // if
     void remove(String name){
         File file = join(Repository.CWD, name);
@@ -121,6 +112,7 @@ class StagingArea implements Serializable {
         writeObject(join(Repository.GITLET_DIR,STAGING_AREA_FILENAME),this);
     }
 
+    //everything is as previous commit
     boolean workTreeClean(){
         List<String> allFiles = plainFilenamesIn(Repository.CWD);
         Commit prev = Commit.load(prevCommitHash);
@@ -136,8 +128,14 @@ class StagingArea implements Serializable {
                 }
             }
         }
+        return nothingToCommit();
+    }
+
+    boolean nothingToCommit(){
         for(String filename : workTree.keySet()) {
             // Check if all staged files are tracked
+            Commit prev = Commit.load(prevCommitHash);
+            Map<String,String> prevFiles = prev.getFiles();
             if(workTree.get(filename) == null ||
                     !workTree.get(filename).getHash().equals(
                             prevFiles.get(filename))){
@@ -146,7 +144,6 @@ class StagingArea implements Serializable {
         }
         return true;
     }
-
     boolean stagedForRemoval(String filename){
         Commit prev = Commit.load(prevCommitHash);
         return prev.contain(filename) && workTree.get(filename) == null;

@@ -46,7 +46,6 @@ public class Repository implements Serializable {
         currentBranch = "master";
         commits = new TreeSet<>();
         stagingArea = new StagingArea();
-        stagingArea.addAll();
         if(Commit.COMMIT_DIR.mkdirs() && Blob.BLOB_DIR.mkdirs()) {
             commit(INITIAL_COMMIT_MESSAGE, Date.from(Instant.EPOCH));
         }

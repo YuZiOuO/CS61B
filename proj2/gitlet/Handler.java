@@ -2,7 +2,6 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.time.Instant;
 import java.util.Date;
 
@@ -44,12 +43,9 @@ public class Handler {
 
     static void commit(String message) throws IOException {
         Repository repo = loadRepository();
-        if(repo.stagingArea.workTreeClean()){
+        if(repo.stagingArea.nothingToCommit()){
             System.out.println("No changes added to the commit.");
             return;
-        }
-        if(message.isEmpty()){
-            System.out.println("Please enter a commit message.");
         }
         repo.commit(message, Date.from(Instant.now()));
         repo.dump();
@@ -87,40 +83,44 @@ public class Handler {
     static void status() {
     }
 
-    static void checkout(String[] arg) {
+    static void checkoutbranch(String branch){
         Repository repo = loadRepository();
-        if (arg.length == 2) {
-            if (repo.checkoutResetFile((String) Array.get(arg,1)) == 1) {
+        int result = repo.checkoutBranch(branch);
+        switch (result) {
+            case 1:
+                System.out.println("No such branch exists.");
+                break;
+            case 2:
+                System.out.println(
+                        "No need to checkout the current branch.");
+                break;
+            case 3:
+                System.out.println(
+                        "There is an untracked file in the way; " +
+                                "delete it, or add and commit it first.");
+                break;
+        }
+        repo.dump();
+    }
+
+    static void checkoutRestore(String name){
+        Repository repo = loadRepository();
+        if (repo.checkoutResetFile(name) == 1) {
+            System.out.println("File does not exist in that commit.");
+        }
+        repo.dump();
+    }
+
+    static void checkoutCherryPick(String commit,String name){
+        Repository repo = loadRepository();
+        int result = repo.checkoutCherryPickFile(commit, name);
+        switch (result) {
+            case 1:
                 System.out.println("File does not exist in that commit.");
-            }
-        } else if (arg.length == 3) {
-            int result = repo.checkoutCherryPickFile(
-                    (String) Array.get(arg,0),
-                    (String) Array.get(arg,2));
-            switch (result) {
-                case 1:
-                    System.out.println("File does not exist in that commit.");
-                    break;
-                case 2:
-                    System.out.println("No commit with that id exists.");
-                    break;
-            }
-        } else {
-            int result = repo.checkoutBranch((String) Array.get(arg,0));
-            switch (result) {
-                case 1:
-                    System.out.println("No such branch exists.");
-                    break;
-                case 2:
-                    System.out.println(
-                            "No need to checkout the current branch.");
-                    break;
-                case 3:
-                    System.out.println(
-                            "There is an untracked file in the way; " +
-                                    "delete it, or add and commit it first.");
-                    break;
-            }
+                break;
+            case 2:
+                System.out.println("No commit with that id exists.");
+                break;
         }
         repo.dump();
     }

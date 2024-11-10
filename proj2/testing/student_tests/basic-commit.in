@@ -1,0 +1,17 @@
++ wug.txt wug.txt
+> init
+<<<
+
+> commit "try to commit"
+No changes added to the commit.
+<<<
+
+> add wug.txt
+<<<
+
+> commit
+Please enter a commit message.
+<<<
+
+>commit "try to commit"
+<<<
