@@ -1,0 +1,79 @@
+I definitions.inc
+
+> init
+<<<
+
+> branch mybranch
+<<<
+
++ wug.txt wug.txt
+
+> add wug.txt
+<<<
+
+> commit "commit 1 @master"
+<<<
+
++ wug.txt notwug.txt
+
+> add wug.txt
+<<<
+
+> commit "commit 2 @master"
+<<<
+
+> log
+===
+${COMMIT_HEAD}
+commit 2 @master
+
+===
+${COMMIT_HEAD}
+commit 1 @master
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+
+> checkout mybranch
+<<<
+
++ wug1.txt wug1.txt
+
+> add wug1.txt
+<<<
+
+> commit "commit @mybranch"
+<<<
+
+> log
+===
+${COMMIT_HEAD}
+commit @mybranch
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+
+> global-log
+===
+${COMMIT_HEAD}
+${ARBLINE}
+
+===
+${COMMIT_HEAD}
+${ARBLINE}
+
+===
+${COMMIT_HEAD}
+${ARBLINE}
+
+===
+${COMMIT_HEAD}
+${ARBLINE}
+
+<<<*

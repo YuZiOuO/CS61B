@@ -135,6 +135,9 @@ class StagingArea implements Serializable {
         for(String filename : workTree.keySet()) {
             // Check if all staged files are tracked
             Commit prev = Commit.load(prevCommitHash);
+            if(prev == null){
+                return workTree.isEmpty();
+            }
             Map<String,String> prevFiles = prev.getFiles();
             if(workTree.get(filename) == null ||
                     !workTree.get(filename).getHash().equals(
@@ -146,6 +149,7 @@ class StagingArea implements Serializable {
     }
     boolean stagedForRemoval(String filename){
         Commit prev = Commit.load(prevCommitHash);
-        return prev.contain(filename) && workTree.get(filename) == null;
+        return !(prev == null) &&
+                prev.contain(filename) && workTree.get(filename) == null;
     }
 }
