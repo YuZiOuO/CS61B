@@ -1,7 +1,6 @@
 package gitlet;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.*;
@@ -41,7 +40,7 @@ public class Repository implements Serializable {
     //cache before dump
     StagingArea stagingArea;
 
-    public Repository() throws IOException {
+    public Repository(){
         refs = new TreeMap<>();
         currentBranch = "master";
         commits = new TreeSet<>();
@@ -51,7 +50,7 @@ public class Repository implements Serializable {
         }
     }
 
-    public void commit(String message, Date timestamp) throws IOException {
+    public void commit(String message, Date timestamp){
         Commit c = stagingArea.toCommit(message,refs.get(currentBranch),timestamp);
         entry = c.getHash();
         refs.put(currentBranch, entry);

@@ -1,7 +1,6 @@
 package gitlet;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
 
@@ -15,7 +14,7 @@ public class Handler {
         return Repository.load(join(GITLET_DIR, Repository.REPO_FILENAME));
     }
 
-    static void init() throws IOException {
+    static void init(){
         if (GITLET_DIR.mkdirs()) {
             Repository repo = new Repository();
             repo.dump();
@@ -41,7 +40,7 @@ public class Handler {
         repo.dump();
     }
 
-    static void commit(String message) throws IOException {
+    static void commit(String message){
         Repository repo = loadRepository();
         if(repo.stagingArea.nothingToCommit()){
             System.out.println("No changes added to the commit.");
