@@ -1,60 +1,56 @@
 package gitlet;
 
 import java.io.File;
+
 import static gitlet.Utils.*;
 
 /* 用于内容不会变动的文件 */
 class Blob extends File {
     public static final File BLOB_DIR = join(Repository.GITLET_DIR, "blob");
 
-    private final String hash;
-    private final byte[] buf;
+    final String hash;
+    final byte[] content;
     private int refs;
 
-    private Blob(File f){
-        super(join(BLOB_DIR,sha1(readContents(f))).getPath());
-        buf = readContents(f);
-        hash = sha1(buf);
+    private Blob(File f) {
+        super(join(BLOB_DIR, "temp_blob").getPath());
+        content = readContents(f);
+        hash = sha1(content);
+        super.renameTo(join(BLOB_DIR, hash));
         refs = 1;
     }
 
-    static Blob push(File f){
+    static Blob push(File f) {
         String hash = sha1(readContents(f));
-        File blob = new File(BLOB_DIR,hash);
-        if(!blob.exists()){
+        File blob = new File(BLOB_DIR, hash);
+        if (!blob.exists()) {
             Blob b = new Blob(f);
             b.dump();
             return b;
-        }else{
-            Blob b = readObject(blob,Blob.class);
+        } else {
+            Blob b = readObject(blob, Blob.class);
             b.refs++;
             return b;
         }
     }
-    int pop(){
+
+    int pop() {
         refs--;
-        if(refs == 0){
+        if (refs == 0) {
             this.delete();
         }
         return refs;
     }
 
-    String getHash(){
-        return hash;
-    }
-
-    void ref(){
+    void ref() {
         refs++;
     }
 
-    byte[] content(){
-        return buf;
+    static Blob load(String hash) {
+        return readObject(join(BLOB_DIR, hash), Blob.class);
     }
 
-    static Blob load(String hash){
-        return readObject(join(BLOB_DIR,hash),Blob.class);
-    }
-    void dump(){
-        writeObject(join(BLOB_DIR,hash),this);
+    void dump() {
+        writeObject(join(BLOB_DIR, hash), this);
     }
 }

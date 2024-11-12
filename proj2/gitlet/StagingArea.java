@@ -2,10 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -19,15 +16,17 @@ class StagingArea implements Serializable {
     //for checkout
     public void checkout(String commitHash) {
         Commit c = Commit.load(commitHash);
-        this.prevCommitHash = c.getParent();
-        this.workTree = Commit.convertToBlobTree(c.getHash());
+        this.prevCommitHash = c.parent;
+        this.workTree = Commit.loadWorkTree(c.hash);
         List<String> allFiles = plainFilenamesIn(Repository.CWD);
-        for(String file : allFiles) {
-            File f = join(Repository.CWD, file);
-            f.delete();
+        if (allFiles != null) {
+            for(String file : allFiles) {
+                File f = join(Repository.CWD, file);
+                f.delete();
+            }
         }
         for(String file : workTree.keySet()) {
-            restore(file);
+            restore(file,null);
         }
     }
 
@@ -45,47 +44,28 @@ class StagingArea implements Serializable {
         }
     }
 
-    // if
     void remove(String name){
         File file = join(Repository.CWD, name);
         Blob prev = Commit.load(prevCommitHash).getBlob(name);
         Blob working = workTree.get(name);
-        if (working.getHash().equals(prev.getHash())) {
+        if (working.hash.equals(prev.hash)) {
             // tracked and not modified
             workTree.put(name,null);
             file.delete();
         }else{
             // modified
             workTree.put(name, prev);
-            writeContents(file,prev.content());
+            writeContents(file, prev.content);
             prev.ref();
         }
         working.pop();
     }
 
-    //reset a file content to a blob
-    //if blob == null, set to blob in current tracked version
-    void reset(String name,Blob blob){
-        File dest = join(Repository.CWD, name);
-        workTree.get(name).pop();
-        if(blob == null){
-            Commit prev = Commit.load(prevCommitHash);
-            blob = Blob.load(prev.getFiles().get(name));
-        }
-        workTree.put(name,blob);
-        blob.ref();
-        writeContents(dest,blob.content());
-    }
-
-    //reset a file content to the staged version
-    void restore(String filename){
+    //reset a file content to the staged or tracked version
+    void restore(String filename,Blob blob){
         File dest = join(Repository.CWD, filename);
-        Blob working = workTree.get(filename);
-        writeContents(dest,working.content());
-    }
-
-    boolean contains(String filename){
-        return filename != null && workTree.containsKey(filename);
+        blob = (blob == null)?workTree.get(filename):blob;
+        writeContents(dest, blob.content);
     }
 
     Commit toCommit(String message, String parent, Date timestamp) {
@@ -99,7 +79,7 @@ class StagingArea implements Serializable {
         for(Blob f : workTree.values()) {
             f.ref();
         }
-        prevCommitHash = c.getHash();
+        prevCommitHash = c.hash;
         return c;
     }
 
@@ -112,44 +92,67 @@ class StagingArea implements Serializable {
         writeObject(join(Repository.GITLET_DIR,STAGING_AREA_FILENAME),this);
     }
 
-    //everything is as previous commit
-    boolean workTreeClean(){
-        List<String> allFiles = plainFilenamesIn(Repository.CWD);
+    boolean contains(String filename){
+        return filename != null && workTree.containsKey(filename);
+    }
+
+    boolean fileStagedForRemoval(String filename){
         Commit prev = Commit.load(prevCommitHash);
-        Map<String,String> prevFiles = prev.getFiles();
-        if(allFiles == null){
-            // Only does the root commit has no files
-            return prev.getParent() == null;
-        }else{
-            // Check if all files are added
-            for(String filename : allFiles) {
-                if(!workTree.containsKey(filename)) {
-                    return false;
+        return !(prev == null)
+                && prev.contain(filename) && workTree.get(filename) == null;
+    }
+
+    //files staged,not include those staged for removal.
+    Set<String> filesStaged(){
+        HashSet<String> staged = new HashSet<>();
+        Map<String,String> prev =
+                (prevCommitHash == null)?new HashMap<>():Commit.load(prevCommitHash).getFiles();
+        for(String filename: workTree.keySet()) {
+            Blob blob = workTree.get(filename);
+            if(blob != null && !blob.hash.equals(prev.get(filename))) {
+                staged.add(filename);
+            }
+        }
+        return staged;
+    }
+    Set<String> filesStagedForRemoval(){
+        HashSet<String> stagedForRemoval = new HashSet<>();
+        for(String filename: workTree.keySet()) {
+            Blob blob = workTree.get(filename);
+            if(blob == null) {
+                stagedForRemoval.add(filename);
+            }
+        }
+        return stagedForRemoval;
+    }
+    List<Set<String>> filesModifiedNotAdded(){
+        HashSet<String> modified = new HashSet<>();
+        HashSet<String> unstagedForRemoval = new HashSet<>();
+        for(String filename: workTree.keySet()) {
+            Blob blob = workTree.get(filename);
+            if(blob != null) {
+                File f = join(Repository.CWD, filename);
+                if(!f.exists()){
+                    unstagedForRemoval.add(filename);
+                    continue;
+                }
+                if(!blob.hash.equals(sha1(readContents(f)))) {
+                    modified.add(filename);
                 }
             }
         }
-        return nothingToCommit();
+        return List.of(modified,unstagedForRemoval);
     }
-
-    boolean nothingToCommit(){
-        for(String filename : workTree.keySet()) {
-            // Check if all staged files are tracked
-            Commit prev = Commit.load(prevCommitHash);
-            if(prev == null){
-                return workTree.isEmpty();
-            }
-            Map<String,String> prevFiles = prev.getFiles();
-            if(workTree.get(filename) == null ||
-                    !workTree.get(filename).getHash().equals(
-                            prevFiles.get(filename))){
-                return false;
+    Set<String> filesUntracked(){
+        HashSet<String> untracked = new HashSet<>();
+        List<String> allFiles = plainFilenamesIn(Repository.GITLET_DIR);
+        if (allFiles != null) {
+            for(String file : allFiles) {
+                if(!workTree.containsKey(file)) {
+                    untracked.add(file);
+                }
             }
         }
-        return true;
-    }
-    boolean stagedForRemoval(String filename){
-        Commit prev = Commit.load(prevCommitHash);
-        return !(prev == null) &&
-                prev.contain(filename) && workTree.get(filename) == null;
+        return untracked;
     }
 }

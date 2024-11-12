@@ -21,31 +21,19 @@ public class Commit implements Serializable {
     /**
      * The message of this Commit.
      */
-    private final String message;
+    final String message;
+    final String hash;
+    final String parent;
 
-    public String getParent() {
-        return parent;
+    Date getTimestamp(){
+        return (Date) timestamp.clone();
     }
-
-    private final String parent;
-
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
     private final Date timestamp;
 
     public Map<String, String> getFiles() {
-        return files;
+        return new HashMap<>(files);
     }
-
     private final Map<String, String> files;
-
-    public String getHash() {
-        return hash;
-    }
-
-    private final String hash;
 
     /* 直接提取StagingArea中的文件 */
     Commit(String message, String parent, Date timestamp, Map<String, Blob> files){
@@ -78,14 +66,14 @@ public class Commit implements Serializable {
         for (String name : files.keySet()) {
             Blob b = files.get(name);
             b.ref();
-            _files.put(name,b.getHash());
+            _files.put(name,b.hash);
             b.dump();
         }
         return _files;
     }
 
     boolean contain(String name){
-        return name != null && files.containsKey(name);
+        return files.containsKey(name);
     }
 
     Blob getBlob(String name){
@@ -101,14 +89,13 @@ public class Commit implements Serializable {
     String toLog(){
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb, Locale.US);
-        f.format("===\ncommit ").format(this.getHash()).format("\nDate: ")
+        f.format("===\ncommit ").format(this.hash).format("\nDate: ")
                 .format("%1$ta %1$tb %1$td %1$tT %1$tY %1$tz\n",this.getTimestamp())
                 .format(this.getMessage()).format("\n\n");
         return sb.toString();
     }
 
-    //for checkout
-    static Map<String,Blob> convertToBlobTree(String hash){
+    static Map<String,Blob> loadWorkTree(String hash){
         Map<String,String> src = Commit.load(hash).files;
         Map<String,Blob> dest = new HashMap<>();
         for(String filename: src.keySet()) {
@@ -118,16 +105,12 @@ public class Commit implements Serializable {
         return dest;
     }
 
-    Commit findParent(Commit from,String target){
-        // Note: load() invokes Utils.readObjects,which throws an error if the file does not exist.
-        if(this.equals(from)) return this;
-        if(this.parent == null) return null;
-        if(matchHash(target, this.parent)){
-            return Commit.load(this.parent);
-        }
-        return findParent(Commit.load(this.parent),target);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Commit)) return false;
+        Commit commit = (Commit) o;
+        return Objects.equals(hash, commit.hash);
     }
-
-
 
 }

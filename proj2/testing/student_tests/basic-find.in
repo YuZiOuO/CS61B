@@ -1,0 +1,61 @@
+I definitions.inc
+
+> init
+<<<
+
++ wug.txt wug.txt
+
+> add wug.txt
+<<<
+
+> commit "first commit @abc"
+<<<
+
++ wug1.txt wug1.txt
+> add wug1.txt
+<<<
+> commit "commit @def"
+<<<
+
+
++ wug2.txt wug2.txt
+> add wug2.txt
+<<<
+> commit "commit @abc"
+<<<
+
+> log
+===
+${COMMIT_HEAD}
+commit @abc
+
+===
+${COMMIT_HEAD}
+commit @def
+
+===
+${COMMIT_HEAD}
+first commit @abc
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+D CID1 "${1}"
+D CID2 "${2}"
+D CID3 "${3}"
+
+> find "@def"
+${CID2}
+<<<*
+
+> find "mit @abc"
+${ARBLINE}
+${ARBLINE}
+<<<*
+
+> find "first commit @abc"
+${CID3}
+<<<*
+

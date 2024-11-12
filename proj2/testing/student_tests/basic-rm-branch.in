@@ -1,0 +1,63 @@
+I definitions.inc
+> init
+<<<
+
+> rm-branch master
+Cannot remove the current branch.
+<<<
+
+> branch newbranch
+<<<
+
++ wug.txt wug.txt
+
+> add wug.txt
+<<<
+
+> commit "commit @master"
+<<<
+
+> log
+===
+${COMMIT_HEAD}
+commit @master
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+
+> rm-branch nonExistBranch
+A branch with that name does not exist.
+<<<
+
+> checkout newbranch
+<<<
+
+> log
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+
+> rm-branch master
+<<<
+
+> checkout master
+No such branch exists.
+<<<
+
+> global-log
+===
+${COMMIT_HEAD}
+${ARBLINE}
+
+===
+${COMMIT_HEAD}
+${ARBLINE}
+
+<<<*
+
+

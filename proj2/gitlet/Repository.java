@@ -35,8 +35,6 @@ public class Repository implements Serializable {
 
     private final Set<String> commits;
 
-    private String entry;
-
     //cache before dump
     StagingArea stagingArea;
 
@@ -52,9 +50,8 @@ public class Repository implements Serializable {
 
     public void commit(String message, Date timestamp){
         Commit c = stagingArea.toCommit(message,refs.get(currentBranch),timestamp);
-        entry = c.getHash();
-        refs.put(currentBranch, entry);
-        commits.add(entry);
+        refs.put(currentBranch, c.hash);
+        commits.add(c.hash);
         c.dump();
     }
 
@@ -71,49 +68,14 @@ public class Repository implements Serializable {
     }
 
     /**
-     * return the latest commit of the currentBranch.
-     *
-     * @return a Commit.
-     */
-    Commit HEAD(){
-        return Commit.load(refs.get(currentBranch));
-    }
-
-    /**
-     * Reset the file with given name to the last commited version.
-     *
-     * @param name The filename to reset.
-     * @return 0 for success, 1 if the given file is untracked.
-     */
-    int checkoutResetFile(String name){
-        Commit c = Commit.load(refs.get(currentBranch));
-        if(!c.contain(name)){
-            return 1;
-        }
-        stagingArea.reset(name,null);
-        return 0;
-    }
-
-    /**
      * Cherry-pick the given file in given commit to CWD, overwrite the currently
      * existing one.
      *
      * @param commit The commit which the file to be extracted from.
      * @param name The file name.
-     * @return 0 for success, 1 if file does not exist, and 2 if commit does not exist.
      */
-    int checkoutCherryPickFile(String commit,String name){
-        commit = findCompleteHash(commit, commits);
-        if(commit != null){
-            Commit c = Commit.load(commit);
-            if(c.contain(name)){
-                Blob b = c.getBlob(name);
-                stagingArea.reset(name,b);
-                return 0;
-            }
-            return 1;
-        }
-        return 2;
+    void checkoutCherryPickFile(String name,String commit){
+        stagingArea.restore(name,commit == null?null:Commit.load(commit).getBlob(name));
     }
 
     /**
@@ -121,31 +83,17 @@ public class Repository implements Serializable {
      * contained in the last commit of the given branch.
      *
      * @param branch The branch to checkout.
-     * @return 0 for success, 1 if branch does not exist, 2 for no need to checkout,3 for untracked files;
      */
-    int checkoutBranch(String branch){
-        if(currentBranch.equals(branch)){
-            return 2;
-        }
-        if(refs.containsKey(branch)){
-            if(!stagingArea.workTreeClean()){
-                return 3;
-            }
-            currentBranch = branch;
-            stagingArea.checkout(refs.get(branch));
-            return 0;
-        }
-        return 1;
+    void checkoutBranch(String branch){
+        currentBranch = branch;
+        stagingArea.checkout(refs.get(branch));
     }
 
     void createBranch(String name){
         refs.put(name,refs.get(currentBranch));
     }
-    boolean branchExists(String branch){
-        return refs.containsKey(branch);
-    }
-    String removeBranch(String name){
-        return refs.remove(name);
+    void removeBranch(String name){
+        refs.remove(name);
     }
     String getCurrentBranch(){
         return currentBranch;
@@ -156,7 +104,7 @@ public class Repository implements Serializable {
         Commit c = Commit.load(refs.get(currentBranch));
         while(c != null){
             sb.append(c.toLog());
-            c = Commit.load(c.getParent());
+            c = Commit.load(c.parent);
         }
         return sb.toString();
     }
@@ -185,9 +133,36 @@ public class Repository implements Serializable {
             Commit c = Commit.load(commit);
             String msg = c.getMessage();
             if(msg.contains(string)){
-                sb.append(c.getHash());
+                sb.append(c.hash).append("\n");
             }
         }
         return sb.toString();
+    }
+
+    void reset(String commitHash){
+        refs.put(currentBranch,commitHash);
+        stagingArea.checkout(commitHash);
+    }
+
+    //O(n) TODO:optimization
+    /**
+     * find if any hash of commits of this repository matches the given substring hash.
+     * A naive implementation with asymptotic O(n).
+     * Should be invoked only at higher layer.
+     *
+     * @param source @NotNull the substring hash.
+     * @return null if nothing matches,otherwise the corresponding hash.
+     */
+    String getCommitHash(String source){
+        for(String s :commits){
+            if(matchHash(source, s)){
+                return s;
+            }
+        }
+        return null;
+    }
+
+    String getReference(String ref){
+        return refs.get(ref);
     }
 }

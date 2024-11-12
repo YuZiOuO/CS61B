@@ -238,25 +238,6 @@ class Utils {
         System.out.println();
     }
 
-    //O(n) TODO:optimization
-
-    /**
-     * find if any hash in Set {@code target} matches the given substring hash.
-     * A naive implementation with asymptotic O(n)
-     *
-     * @param source @NotNull the substring hash.
-     * @param target the set where the corresponding hash to be found.
-     * @return null if nothing in {@code target} matches,otherwise the corresponding hash.
-     */
-    static String findCompleteHash(String source, Set<String> target){
-        for(String s : target){
-            if(matchHash(source, s)){
-                return s;
-            }
-        }
-        return null;
-    }
-
     /**
      * Check if the hash {@code source} equals the hash {@code target}
      * i.e. if {@code source} equals any of {@code target}'s front substring.
