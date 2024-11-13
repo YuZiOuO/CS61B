@@ -27,6 +27,9 @@ public class Main {
                     case "commit":
                         System.out.println("Please enter a commit message.");
                         break;
+                    case "status":
+                        Handler.status();
+                        break;
                 }
                 break;
             case 2:

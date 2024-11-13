@@ -1,0 +1,53 @@
+# Check that we can check out a previous version.
+I definitions.inc
+> init
+<<<
++ wug.txt wug.txt
++ wug1.txt wug1.txt
++ wug2.txt wug2.txt
+> add wug.txt
+<<<
+> add wug1.txt
+<<<
+> add wug2.txt
+<<<
+> commit "my commit"
+<<<
+
+# staged add
++ wug3.txt wug3.txt
+> add wug3.txt
+<<<
+
+# staged removal
+> rm wug1.txt
+<<<
+
++ wug.txt notwug.txt #unstaged modification
+- wug2.txt #unstaged delete
+
++ notwug.txt notwug.txt #unstaged tracked
+
+> status
+=== Branches ===
+*master
+
+=== Staged Files ===
+wug3.txt
+
+=== Removed Files ===
+wug1.txt
+
+=== Modifications Not Staged For Commit ===
+wug2.txt (deleted)
+wug.txt (modified)
+
+=== Untracked Files ===
+notwug.txt
+
+<<<
+
+
+
+
+

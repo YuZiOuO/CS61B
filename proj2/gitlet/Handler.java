@@ -14,7 +14,7 @@ public class Handler {
         return Repository.load(join(GITLET_DIR, Repository.REPO_FILENAME));
     }
 
-    static void init(){
+    static void init() {
         if (GITLET_DIR.mkdirs()) {
             Repository repo = new Repository();
             repo.dump();
@@ -27,11 +27,11 @@ public class Handler {
     static void add(String name) {
         Repository repo = loadRepository();
         StagingArea staging = repo.stagingArea;
-        if(staging.fileStagedForRemoval(name)){
-            staging.restore(name,null);
-        }else{
-            File f = join(CWD,name);
-            if(!f.exists()){
+        if (staging.fileStagedForRemoval(name)) {
+            staging.restore(name, null);
+        } else {
+            File f = join(CWD, name);
+            if (!f.exists()) {
                 System.out.println("File does not exist.");
                 return;
             }
@@ -40,8 +40,8 @@ public class Handler {
         repo.dump();
     }
 
-    static void commit(String message){
-        if(message.isEmpty()){
+    static void commit(String message) {
+        if (message.isEmpty()) {
             System.out.println("Please enter a commit message.");
             return;
         }
@@ -84,43 +84,40 @@ public class Handler {
         repo.dump();
     }
 
-    static void status() {
-    }
-
-    static void checkoutBranch(String branch){
+    static void checkoutBranch(String branch) {
         Repository repo = loadRepository();
-        if(repo.getCurrentBranch().equals(branch)){
+        if (repo.getCurrentBranch().equals(branch)) {
             System.out.println("No need to checkout the current branch.");
-        }else if(repo.getReference(branch) == null){
+        } else if (repo.getReference(branch) == null) {
             System.out.println("No such branch exists.");
-        }else{
+        } else {
             repo.checkoutBranch(branch);
         }
         repo.dump();
     }
 
-    static void checkoutCherryPick(String name,String commit){
+    static void checkoutCherryPick(String name, String commit) {
         Repository repo = loadRepository();
-        if(commit != null){
+        if (commit != null) {
             String completeHash = repo.getCommitHash(commit);
-            if(completeHash == null){
+            if (completeHash == null) {
                 System.out.println("No commit with that id exists.");
-            }else if(Commit.load(completeHash).getFiles().get(name) == null){
+            } else if (Commit.load(completeHash).getFiles().get(name) == null) {
                 System.out.println("File does not exist in that commit.");
-            }else{
-                repo.checkoutCherryPickFile(name,completeHash);
+            } else {
+                repo.checkoutCherryPickFile(name, completeHash);
             }
-        }else{
-            repo.checkoutCherryPickFile(name,null);
+        } else {
+            repo.checkoutCherryPickFile(name, null);
         }
         repo.dump();
     }
 
     static void branch(String name) {
         Repository repo = loadRepository();
-        if(repo.getReference(name) != null){
+        if (repo.getReference(name) != null) {
             System.out.println("A branch with that name already exists.");
-        }else{
+        } else {
             repo.createBranch(name);
         }
         repo.dump();
@@ -128,11 +125,11 @@ public class Handler {
 
     static void rmBranch(String name) {
         Repository repo = loadRepository();
-        if(repo.getReference(name) == null){
+        if (repo.getReference(name) == null) {
             System.out.println("A branch with that name does not exist.");
-        }else if(name.equals(repo.getCurrentBranch())){
+        } else if (name.equals(repo.getCurrentBranch())) {
             System.out.println("Cannot remove the current branch.");
-        }else{
+        } else {
             repo.removeBranch(name);
         }
         repo.dump();
@@ -141,19 +138,22 @@ public class Handler {
     static void reset(String hash) {
         Repository repo = loadRepository();
         hash = repo.getCommitHash(hash);
-        if(hash == null){
+        if (hash == null) {
             System.out.println("No commit with that id exists.");
-        }else if(!repo.stagingArea.filesStaged().isEmpty()
-                || !repo.stagingArea.filesStagedForRemoval().isEmpty()){
+        } else if (!repo.stagingArea.filesStaged().isEmpty()
+                || !repo.stagingArea.filesStagedForRemoval().isEmpty()) {
             System.out.println(
                     "There is an untracked file in the way; " +
                             "delete it, or add and commit it first.");
-        }else{
+        } else {
             repo.reset(hash);
         }
         repo.dump();
     }
 
-    static void merge(String name) {
+    static void status() {
+        Repository repo = loadRepository();
+        System.out.println(repo.status());
+        repo.dump();
     }
 }
