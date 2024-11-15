@@ -1,6 +1,8 @@
 package hashmap;
 
 import static org.junit.Assert.*;
+
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -108,6 +110,11 @@ public class TestMyHashMap {
         }
         assertEquals(455, b.size()); //keys are there
         Set<String> keySet = b.keySet();
+        for(String key : values) {
+            if(!keySet.contains(key)) {
+                System.out.println(key + ": " + b.get(key));
+            }
+        }
         assertTrue(values.containsAll(keySet));
         assertTrue(keySet.containsAll(values));
     }
