@@ -10,8 +10,8 @@ import java.util.*;
  *  @author CYZ
  */
 public class MyHashMap<K, V> implements Map61B<K, V> {
-    static double DEFAULT_LOAD_FACTOR = 0.75;
-    static int DEFAULT_INITIAL_SIZE = 16;
+    private static final double DEFAULT_LOAD_FACTOR = 0.75;
+    private static final int DEFAULT_INITIAL_SIZE = 16;
 
 
     /**
