@@ -1,5 +1,7 @@
 package gitlet;
 
+import static gitlet.Utils.message;
+
 /**
  * Driver class for Gitlet, a subset of the Git version-control system.
  *
@@ -25,7 +27,7 @@ public class Main {
                         Handler.globalLog();
                         break;
                     case "commit":
-                        System.out.println("Please enter a commit message.");
+                        message("Please enter a commit message.");
                         break;
                     case "status":
                         Handler.status();

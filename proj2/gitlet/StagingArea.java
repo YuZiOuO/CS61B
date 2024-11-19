@@ -13,16 +13,18 @@ class StagingArea implements Serializable {
     private String prevCommitHash;
     private Map<String, Blob> workTree;
 
-    //for checkout
     public void checkout(String commitHash) {
         Commit c = Commit.load(commitHash);
-        this.prevCommitHash = c.parent;
-        this.workTree = Commit.loadWorkTree(c.hash);
+        checkout(c.parent.get(0),Commit.loadWorkTree(c.hash));
+    }
+
+    void checkout(String prevCommitHash,Map<String, Blob> workTree) {
+        this.prevCommitHash = prevCommitHash;
+        this.workTree = workTree;
         List<String> allFiles = plainFilenamesIn(Repository.CWD);
         if (allFiles != null) {
             for (String file : allFiles) {
-                File f = join(Repository.CWD, file);
-                f.delete();
+                restrictedDelete(join(Repository.CWD, file));
             }
         }
         for (String file : workTree.keySet()) {
@@ -51,7 +53,7 @@ class StagingArea implements Serializable {
         if (working.hash.equals(prev.hash)) {
             // tracked and not modified
             workTree.put(name, null);
-            file.delete();
+            restrictedDelete(file);
         } else {
             // modified
             workTree.put(name, prev);
@@ -61,11 +63,18 @@ class StagingArea implements Serializable {
         working.pop();
     }
 
-    //reset a file content to the staged or tracked version
+    /**
+     * Reset a file content to the staged or tracked version
+     * @param filename The file to reset.
+     * @param blob A blob object,representing content of the file.
+     *             If null is passed,restore the staged version.
+     */
     void restore(String filename, Blob blob) {
         File dest = join(Repository.CWD, filename);
         blob = (blob == null) ? workTree.get(filename) : blob;
-        writeContents(dest, blob.content);
+        if(blob != null) {
+            writeContents(dest, blob.content);
+        }
     }
 
     Commit toCommit(String message, String parent, Date timestamp) {
@@ -102,7 +111,9 @@ class StagingArea implements Serializable {
                 && prev.contain(filename) && workTree.get(filename) == null;
     }
 
-    //files staged,not include those staged for removal.
+    /**
+     * @return A set of files that is staged,not include those staged for removal.
+     */
     Set<String> filesStaged() {
         HashSet<String> staged = new HashSet<>();
         Map<String, String> prev =

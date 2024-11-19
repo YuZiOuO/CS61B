@@ -23,7 +23,7 @@ public class Commit implements Serializable {
      */
     final String message;
     final String hash;
-    final String parent;
+    final List<String> parent;
 
     Date getTimestamp(){
         return (Date) timestamp.clone();
@@ -38,7 +38,8 @@ public class Commit implements Serializable {
     /* 直接提取StagingArea中的文件 */
     Commit(String message, String parent, Date timestamp, Map<String, Blob> files){
         this.message = message;
-        this.parent = parent;
+        this.parent = new ArrayList<>();
+        this.parent.add(parent);
         this.timestamp = timestamp;
         this.files = cache(files);
         this.hash = sha1(this.toString());
@@ -113,4 +114,67 @@ public class Commit implements Serializable {
         return Objects.equals(hash, commit.hash);
     }
 
+    /**
+     * Traverse the commit tree using BFS,get a map from commits to their child
+     * where commits are all entry's ancestors.
+     * Asymptotic: O(n) where n is the number of {@code from}'s ancestor.
+     * @param entry The entry of the traverse.
+     * @return A map which maps commits to their parents.
+     */
+    static Map<String,String> traverse(String entry){
+        Queue<String> traversalQueue = new ArrayDeque<>();
+        HashMap<String, String> childOf = new HashMap<>();
+        HashSet<String> marked = new HashSet<>();
+
+        traversalQueue.add(entry);
+        childOf.put(entry, null);
+
+        while (!traversalQueue.isEmpty()) {
+            String current = traversalQueue.poll();
+            Commit parent = load(current);
+            for (String p : parent.parent) {
+                if (!marked.contains(p)) {
+                    traversalQueue.add(p);
+                    marked.add(p);
+                    childOf.put(p, current);
+                }
+            }
+        }
+        return childOf;
+    }
+
+    /**
+     * Traverse the commit tree,search a path from Commit {@code from} to Commit {@code to}.
+     * The Commit{@code from} should be a child node of {@code to}.
+     * Asymptotic: O(n) where n is the number of {@code from}'s ancestor.
+     * @param from the entry of the search.
+     * @param to the commit to be searched.
+     * @return A List representing a path serialized from {@code to} to {@code from}.
+     * If such path does not exist,return {@code null}.
+     */
+    static List<String> path(String from, String to) {
+        Map<String,String> traversed = traverse(from);
+        List<String> result = new ArrayList<>();
+        if (traversed.get(to)!=null) {
+            String iter = to;
+            while (iter != null) {
+                result.add(iter);
+                iter = traversed.get(iter);
+            }
+        }
+        return result.isEmpty() ? null : result;
+    }
+
+    /**
+     * Find the split point(defined in proj2 webpage) of two commits.
+     * @return A string representing the split point hash.
+     */
+    static String splitPoint(String commit1,String commit2){
+        Map<String,String> traversed = traverse(commit1);
+        Commit iter = Commit.load(commit2);
+        while(traversed.get(iter.hash)==null){
+            iter = Commit.load(iter.parent.get(0));
+        }
+        return iter.hash;
+    }
 }

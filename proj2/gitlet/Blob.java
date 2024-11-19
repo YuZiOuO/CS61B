@@ -4,7 +4,7 @@ import java.io.File;
 
 import static gitlet.Utils.*;
 
-/* 用于内容不会变动的文件 */
+// abstract of staged and tracked files
 class Blob extends File {
     public static final File BLOB_DIR = join(Repository.GITLET_DIR, "blob");
 

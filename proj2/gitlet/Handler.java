@@ -19,7 +19,7 @@ public class Handler {
             Repository repo = new Repository();
             repo.dump();
         } else {
-            System.out.println(
+            message(
                     "A Gitlet version-control system already exists in the current directory.");
         }
     }
@@ -32,7 +32,7 @@ public class Handler {
         } else {
             File f = join(CWD, name);
             if (!f.exists()) {
-                System.out.println("File does not exist.");
+                message("File does not exist.");
                 return;
             }
         }
@@ -42,13 +42,13 @@ public class Handler {
 
     static void commit(String message) {
         if (message.isEmpty()) {
-            System.out.println("Please enter a commit message.");
+            message("Please enter a commit message.");
             return;
         }
         Repository repo = loadRepository();
         if (repo.stagingArea.filesStaged().isEmpty()
                 && repo.stagingArea.filesStagedForRemoval().isEmpty()) {
-            System.out.println("No changes added to the commit.");
+            message("No changes added to the commit.");
             return;
         }
         repo.commit(message, Date.from(Instant.now()));
@@ -59,7 +59,7 @@ public class Handler {
         Repository repo = loadRepository();
         StagingArea stagingArea = repo.stagingArea;
         if (!stagingArea.contains(name)) {
-            System.out.println("No reason to remove the file.");
+            message("No reason to remove the file.");
             return;
         }
         repo.stagingArea.remove(name);
@@ -68,28 +68,28 @@ public class Handler {
 
     static void log() {
         Repository repo = loadRepository();
-        System.out.println(repo.log());
+        message(repo.log());
         repo.dump();
     }
 
     static void globalLog() {
         Repository repo = loadRepository();
-        System.out.println(repo.globalLog());
+        message(repo.globalLog());
         repo.dump();
     }
 
     static void find(String message) {
         Repository repo = loadRepository();
-        System.out.println(repo.find(message));
+        message(repo.find(message));
         repo.dump();
     }
 
     static void checkoutBranch(String branch) {
         Repository repo = loadRepository();
         if (repo.getCurrentBranch().equals(branch)) {
-            System.out.println("No need to checkout the current branch.");
+            message("No need to checkout the current branch.");
         } else if (repo.getReference(branch) == null) {
-            System.out.println("No such branch exists.");
+            message("No such branch exists.");
         } else {
             repo.checkoutBranch(branch);
         }
@@ -101,9 +101,9 @@ public class Handler {
         if (commit != null) {
             String completeHash = repo.getCommitHash(commit);
             if (completeHash == null) {
-                System.out.println("No commit with that id exists.");
+                message("No commit with that id exists.");
             } else if (Commit.load(completeHash).getFiles().get(name) == null) {
-                System.out.println("File does not exist in that commit.");
+                message("File does not exist in that commit.");
             } else {
                 repo.checkoutCherryPickFile(name, completeHash);
             }
@@ -116,7 +116,7 @@ public class Handler {
     static void branch(String name) {
         Repository repo = loadRepository();
         if (repo.getReference(name) != null) {
-            System.out.println("A branch with that name already exists.");
+            message("A branch with that name already exists.");
         } else {
             repo.createBranch(name);
         }
@@ -126,9 +126,9 @@ public class Handler {
     static void rmBranch(String name) {
         Repository repo = loadRepository();
         if (repo.getReference(name) == null) {
-            System.out.println("A branch with that name does not exist.");
+            message("A branch with that name does not exist.");
         } else if (name.equals(repo.getCurrentBranch())) {
-            System.out.println("Cannot remove the current branch.");
+            message("Cannot remove the current branch.");
         } else {
             repo.removeBranch(name);
         }
@@ -139,10 +139,10 @@ public class Handler {
         Repository repo = loadRepository();
         hash = repo.getCommitHash(hash);
         if (hash == null) {
-            System.out.println("No commit with that id exists.");
+            message("No commit with that id exists.");
         } else if (!repo.stagingArea.filesStaged().isEmpty()
                 || !repo.stagingArea.filesStagedForRemoval().isEmpty()) {
-            System.out.println(
+            message(
                     "There is an untracked file in the way; " +
                             "delete it, or add and commit it first.");
         } else {
@@ -153,7 +153,34 @@ public class Handler {
 
     static void status() {
         Repository repo = loadRepository();
-        System.out.println(repo.status());
+        message(repo.status());
+        repo.dump();
+    }
+
+    static void merge(String branch){
+        Repository repo = loadRepository();
+        StagingArea stagingArea = repo.stagingArea;
+        if(!stagingArea.filesStagedForRemoval().isEmpty() ||
+                !stagingArea.filesStaged().isEmpty()){
+            message("You have uncommitted changes.");
+            return;
+        }
+        if(repo.getReference(branch) == null){
+            message("A branch with that name does not exist.");
+            return;
+        }
+        if(branch.equals(repo.getCurrentBranch())){
+            message("Cannot merge a branch with itself.");
+            return;
+        }
+        if(!stagingArea.filesUnstagedForModification().isEmpty() ||
+                !stagingArea.filesUnstagedForRemoval().isEmpty() ||
+                !stagingArea.filesUntracked().isEmpty()){
+            message("There is an untracked file in the way; " +
+                    "delete it, or add and commit it first.");
+            return;
+        }
+        repo.merge(branch);
         repo.dump();
     }
 }

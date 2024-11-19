@@ -107,7 +107,7 @@ public class Repository implements Serializable {
         Commit c = Commit.load(refs.get(currentBranch));
         while (c != null) {
             sb.append(c.toLog());
-            c = Commit.load(c.parent);
+            c = Commit.load(c.parent.get(0));
         }
         return sb.toString();
     }
@@ -149,7 +149,6 @@ public class Repository implements Serializable {
     }
 
     //O(n) TODO:optimization
-
     /**
      * find if any hash of commits of this repository matches the given substring hash.
      * A naive implementation with asymptotic O(n).
@@ -211,5 +210,20 @@ public class Repository implements Serializable {
                         .replace("]", "\n"));
 
         return sb.toString();
+    }
+
+    void merge(String branch){
+        String splitPoint = Commit.splitPoint(refs.get(currentBranch),branch);
+        if(splitPoint.equals(refs.get(branch))){
+            message("Given branch is an ancestor of the current branch.");
+            refs.put(branch, refs.get(currentBranch));
+        }else if(splitPoint.equals(refs.get(currentBranch))){
+            message("Current branch fast-forwarded.");
+            stagingArea.checkout(refs.get(branch));
+            refs.put(currentBranch, refs.get(branch));
+        }else{
+            Map<String,Blob> splitWorkTree = Commit.loadWorkTree(splitPoint);
+
+        }
     }
 }

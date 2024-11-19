@@ -14,10 +14,7 @@ import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 /** Assorted utilities.
@@ -62,6 +59,23 @@ class Utils {
      *  VALS. */
     static String sha1(List<Object> vals) {
         return sha1(vals.toArray(new Object[vals.size()]));
+    }
+
+    /**
+     * Check if the hash {@code source} equals the hash {@code target}
+     * i.e. if {@code source} equals any of {@code target}'s front substring.
+     *
+     * @param source @NotNull the source hash substring with more than 6 characters.
+     * @param target @NotNull the target hash.
+     * @return true if matches and {@code source.length() > 6},otherwise false.
+     */
+    static boolean matchHash(String source, String target) {
+        int length = source.length();
+        if (length < 6) {
+            return false;
+        }
+        String sub = target.substring(0, length);
+        return sub.equals(source);
     }
 
     /* FILE DELETION */
@@ -158,6 +172,7 @@ class Utils {
         writeContents(file, serialize(obj));
     }
 
+
     /* DIRECTORIES */
 
     /** Filter out all but plain files. */
@@ -189,16 +204,17 @@ class Utils {
         return plainFilenamesIn(new File(dir));
     }
 
+
     /* OTHER FILE UTILITIES */
 
-    /** Return the concatentation of FIRST and OTHERS into a File designator,
+    /** Return the concatenation of FIRST and OTHERS into a File designator,
      *  analogous to the {@link java.nio.file.Paths.#get(String, String[])}
      *  method. */
     static File join(String first, String... others) {
         return Paths.get(first, others).toFile();
     }
 
-    /** Return the concatentation of FIRST and OTHERS into a File designator,
+    /** Return the concatenation of FIRST and OTHERS into a File designator,
      *  analogous to the {@link java.nio.file.Paths.#get(String, String[])}
      *  method. */
     static File join(File first, String... others) {
@@ -222,7 +238,6 @@ class Utils {
     }
 
 
-
     /* MESSAGES AND ERROR REPORTING */
 
     /** Return a GitletException whose message is composed from MSG and ARGS as
@@ -236,23 +251,6 @@ class Utils {
     static void message(String msg, Object... args) {
         System.out.printf(msg, args);
         System.out.println();
-    }
-
-    /**
-     * Check if the hash {@code source} equals the hash {@code target}
-     * i.e. if {@code source} equals any of {@code target}'s front substring.
-     *
-     * @param source @NotNull the source hash substring with more than 6 characters.
-     * @param target @NotNull the target hash.
-     * @return true if matches and {@code source.length() > 6},otherwise false.
-     */
-    static boolean matchHash(String source, String target) {
-        int length = source.length();
-        if (length < 6) {
-            return false;
-        }
-        String sub = target.substring(0, length);
-        return sub.equals(source);
     }
 
 }
