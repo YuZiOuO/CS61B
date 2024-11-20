@@ -15,7 +15,7 @@ class StagingArea implements Serializable {
 
     public void checkout(String commitHash) {
         Commit c = Commit.load(commitHash);
-        checkout(c.parent.get(0),Commit.loadWorkTree(c.hash));
+        checkout(c.hash,Commit.loadWorkTree(c.hash));
     }
 
     void checkout(String prevCommitHash,Map<String, Blob> workTree) {

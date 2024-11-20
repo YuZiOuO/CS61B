@@ -137,7 +137,7 @@ public class Commit implements Serializable {
             String current = traversalQueue.poll();
             Commit parent = load(current);
             for (String p : parent.parent) {
-                if (!marked.contains(p)) {
+                if (p != null && !marked.contains(p)) {
                     traversalQueue.add(p);
                     marked.add(p);
                     childOf.put(p, current);

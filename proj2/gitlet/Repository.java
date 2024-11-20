@@ -217,7 +217,7 @@ public class Repository implements Serializable {
     }
 
     void merge(String branch){
-        String splitPoint = Commit.splitPoint(refs.get(currentBranch),branch);
+        String splitPoint = Commit.splitPoint(refs.get(currentBranch),refs.get(branch));
         if(splitPoint.equals(refs.get(branch))){
             message("Given branch is an ancestor of the current branch.");
             refs.put(branch, refs.get(currentBranch));
@@ -231,46 +231,39 @@ public class Repository implements Serializable {
             Map<String,String> givenTree = Commit.load(getReference(branch)).getFiles();
 
             for(String f:givenTree.keySet()){
-                String givenHash = givenTree.get(f);
-                String currentHash = currentTree.get(f);
-                String splitHash = splitTree.get(f).hash;
-                if(!currentTree.containsKey(f)){
-                    // TODO:improve if logic.
-                    //在当前分支被删除
-                    continue;
+                String given = givenTree.get(f);
+                String current = currentTree.get(f);
+                if(current == null){
+                    if(splitTree.get(f) == null){
+                        currentTree.put(f,givenTree.get(f));
+                    }
+                }else{
+                    if(!current.equals(given)){
+                        Blob givenBlob = readObject(join(Blob.BLOB_DIR,given),Blob.class);
+                        Blob currentBlob = readObject(join(Blob.BLOB_DIR,current), Blob.class);
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("<<<<<<< HEAD\n")
+                                .append(Arrays.toString(currentBlob.content))
+                                .append("=======\n")
+                                .append(Arrays.toString(givenBlob.content))
+                                .append(">>>>>>>\n");
+                        Blob conflict = Blob.push(sb.toString().getBytes());
+                        currentTree.put(f, conflict.hash);
+                    }
                 }
-                if(splitHash.equals(givenHash)){
-                    //给定分支未修改，当前分支已/未修改
-                    continue;
-                }
-                if(!splitHash.equals(currentHash)){
-                    //文件冲突
-                    Blob given = readObject(join(Blob.BLOB_DIR,givenHash),Blob.class);
-                    Blob current = readObject(join(Blob.BLOB_DIR,currentHash), Blob.class);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("<<<<<<< HEAD\n")
-                            .append(Arrays.toString(current.content))
-                            .append("=======\n")
-                            .append(Arrays.toString(given.content))
-                            .append(">>>>>>>\n");
-                    Blob conflict = Blob.push(sb.toString().getBytes());
-                    currentTree.put(f, conflict.hash);
-                    continue;
-                }
-                //给定分支已修改，当前分支未修改
-                currentTree.put(f,givenTree.get(f));
             }
+
             for(String f:currentTree.keySet()){
-                if(!givenTree.containsKey(f)){
-                    //在给定分支被删除
+                if(splitTree.containsKey(f) && !givenTree.containsKey(f)){
                     currentTree.remove(f);
                 }
             }
 
             stagingArea.checkout(refs.get(currentBranch),Commit.loadWorkTree(currentTree));
-            String[] parents = new String[]{currentBranch,branch};
-            multiParentCommit("Merged "+branch+" into "+currentBranch
+            String[] parents = new String[]{refs.get(currentBranch),refs.get(branch)};
+            multiParentCommit("Merged "+branch+" into "+currentBranch + "."
                     ,Date.from(Instant.now()),parents);
+            refs.put(branch, refs.get(currentBranch));
         }
     }
 }

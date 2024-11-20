@@ -1,0 +1,48 @@
+I definitions.inc
+> init
+<<<
+
++ wug.txt wug.txt
+
+> add wug.txt
+<<<
+
+> commit "wug.txt"
+<<<
+
+> branch given
+<<<
+
++ wug1.txt wug1.txt
+> add wug1.txt
+<<<
+> commit master
+<<<
+
+> checkout given
+<<<
+
++ wug2.txt wug2.txt
+
+> add wug2.txt
+<<<
+> commit given
+<<<
+
+> checkout master
+<<<
+
+> merge given
+<<<
+
+E wug1.txt
+E wug2.txt
+E wug.txt
+
+> log
+===
+${COMMIT_HEAD}
+Merged given into master.
+${ARBLINES}
+
+<<<*
