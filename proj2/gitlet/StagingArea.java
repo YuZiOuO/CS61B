@@ -77,7 +77,7 @@ class StagingArea implements Serializable {
         }
     }
 
-    Commit toCommit(String message, String parent, Date timestamp) {
+    Commit toCommit(String message, String[] parent, Date timestamp) {
         for (String filename : workTree.keySet()) {
             // delete the file if staged for removal
             if (workTree.get(filename) == null) {

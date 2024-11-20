@@ -36,10 +36,10 @@ public class Commit implements Serializable {
     private final Map<String, String> files;
 
     /* 直接提取StagingArea中的文件 */
-    Commit(String message, String parent, Date timestamp, Map<String, Blob> files){
+    Commit(String message, String[] parent, Date timestamp, Map<String, Blob> files){
         this.message = message;
         this.parent = new ArrayList<>();
-        this.parent.add(parent);
+        this.parent.addAll(Arrays.asList(parent));
         this.timestamp = timestamp;
         this.files = cache(files);
         this.hash = sha1(this.toString());
@@ -96,11 +96,15 @@ public class Commit implements Serializable {
         return sb.toString();
     }
 
-    static Map<String,Blob> loadWorkTree(String hash){
-        Map<String,String> src = Commit.load(hash).files;
+    static Map<String,Blob> loadWorkTree(String commitHash){
+        Map<String,String> src = Commit.load(commitHash).files;
+        return loadWorkTree(src);
+    }
+
+    static Map<String,Blob> loadWorkTree(Map<String,String> hashTree){
         Map<String,Blob> dest = new HashMap<>();
-        for(String filename: src.keySet()) {
-            Blob b = Blob.load(src.get(filename));
+        for(String filename: hashTree.keySet()) {
+            Blob b = Blob.load(hashTree.get(filename));
             dest.put(filename,b);
         }
         return dest;
@@ -141,28 +145,6 @@ public class Commit implements Serializable {
             }
         }
         return childOf;
-    }
-
-    /**
-     * Traverse the commit tree,search a path from Commit {@code from} to Commit {@code to}.
-     * The Commit{@code from} should be a child node of {@code to}.
-     * Asymptotic: O(n) where n is the number of {@code from}'s ancestor.
-     * @param from the entry of the search.
-     * @param to the commit to be searched.
-     * @return A List representing a path serialized from {@code to} to {@code from}.
-     * If such path does not exist,return {@code null}.
-     */
-    static List<String> path(String from, String to) {
-        Map<String,String> traversed = traverse(from);
-        List<String> result = new ArrayList<>();
-        if (traversed.get(to)!=null) {
-            String iter = to;
-            while (iter != null) {
-                result.add(iter);
-                iter = traversed.get(iter);
-            }
-        }
-        return result.isEmpty() ? null : result;
     }
 
     /**

@@ -50,7 +50,11 @@ public class Repository implements Serializable {
     }
 
     public void commit(String message, Date timestamp) {
-        Commit c = stagingArea.toCommit(message, refs.get(currentBranch), timestamp);
+        multiParentCommit(message,timestamp,new String[]{refs.get(currentBranch)});
+    }
+
+    private void multiParentCommit(String message,Date timestamp,String[] parent) {
+        Commit c = stagingArea.toCommit(message, parent, timestamp);
         refs.put(currentBranch, c.hash);
         commits.add(c.hash);
         c.dump();
@@ -222,8 +226,51 @@ public class Repository implements Serializable {
             stagingArea.checkout(refs.get(branch));
             refs.put(currentBranch, refs.get(branch));
         }else{
-            Map<String,Blob> splitWorkTree = Commit.loadWorkTree(splitPoint);
+            Map<String,Blob> splitTree = Commit.loadWorkTree(splitPoint);
+            Map<String,String> currentTree = Commit.load(getReference(currentBranch)).getFiles();
+            Map<String,String> givenTree = Commit.load(getReference(branch)).getFiles();
 
+            for(String f:givenTree.keySet()){
+                String givenHash = givenTree.get(f);
+                String currentHash = currentTree.get(f);
+                String splitHash = splitTree.get(f).hash;
+                if(!currentTree.containsKey(f)){
+                    // TODO:improve if logic.
+                    //在当前分支被删除
+                    continue;
+                }
+                if(splitHash.equals(givenHash)){
+                    //给定分支未修改，当前分支已/未修改
+                    continue;
+                }
+                if(!splitHash.equals(currentHash)){
+                    //文件冲突
+                    Blob given = readObject(join(Blob.BLOB_DIR,givenHash),Blob.class);
+                    Blob current = readObject(join(Blob.BLOB_DIR,currentHash), Blob.class);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("<<<<<<< HEAD\n")
+                            .append(Arrays.toString(current.content))
+                            .append("=======\n")
+                            .append(Arrays.toString(given.content))
+                            .append(">>>>>>>\n");
+                    Blob conflict = Blob.push(sb.toString().getBytes());
+                    currentTree.put(f, conflict.hash);
+                    continue;
+                }
+                //给定分支已修改，当前分支未修改
+                currentTree.put(f,givenTree.get(f));
+            }
+            for(String f:currentTree.keySet()){
+                if(!givenTree.containsKey(f)){
+                    //在给定分支被删除
+                    currentTree.remove(f);
+                }
+            }
+
+            stagingArea.checkout(refs.get(currentBranch),Commit.loadWorkTree(currentTree));
+            String[] parents = new String[]{currentBranch,branch};
+            multiParentCommit("Merged "+branch+" into "+currentBranch
+                    ,Date.from(Instant.now()),parents);
         }
     }
 }

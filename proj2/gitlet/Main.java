@@ -60,6 +60,9 @@ public class Main {
                     case "reset":
                         Handler.reset(args[1]);
                         break;
+                    case "merge":
+                        Handler.merge(args[1]);
+                        break;
                 }
                 break;
             case 3:
