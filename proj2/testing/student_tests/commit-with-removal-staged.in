@@ -1,0 +1,5 @@
+I setup-repo.inc
+> rm wug.txt
+<<<
+> commit "test"
+<<<
