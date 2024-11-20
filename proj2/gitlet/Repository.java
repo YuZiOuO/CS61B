@@ -185,33 +185,28 @@ public class Repository implements Serializable {
             }
         }
 
-        sb.append("\n=== Staged Files ===")
-                .append(stagingArea.filesStaged().toString()
-                        .replace("[", "\n")
-                        .replaceAll(",", "\n")
-                        .replace("]", "\n"));
+        sb.append("\n=== Staged Files ===\n");
+        for(String f:stagingArea.filesStaged()){
+            sb.append(f).append("\n");
+        }
 
-        sb.append("\n=== Removed Files ===")
-                .append(stagingArea.filesStagedForRemoval().toString()
-                        .replace("[", "\n")
-                        .replaceAll(",", "\n")
-                        .replace("]", "\n"));
+        sb.append("\n=== Removed Files ===\n");
+        for(String f:stagingArea.filesStagedForRemoval()){
+            sb.append(f).append("\n");
+        }
 
-        sb.append("\n=== Modifications Not Staged For Commit ===")
-                .append(stagingArea.filesUnstagedForRemoval().toString()
-                        .replace("[", "\n")
-                        .replaceAll(",", " (deleted)\n")
-                        .replace("]", " (deleted)\n"))
-                .append(stagingArea.filesUnstagedForModification().toString()
-                        .replace("[", "")
-                        .replaceAll(",", " (modified)\n")
-                        .replace("]", " (modified)\n"));
+        sb.append("\n=== Modifications Not Staged For Commit ==\n");
+        for(String f:stagingArea.filesUnstagedForRemoval()){
+            sb.append(f).append(" (deleted)\n");
+        }
+        for(String f:stagingArea.filesUnstagedForModification()){
+            sb.append(f).append(" (modified)\n");
+        }
 
-        sb.append("\n=== Untracked Files ===")
-                .append(stagingArea.filesUntracked().toString()
-                        .replace("[", "\n")
-                        .replaceAll(",", "\n")
-                        .replace("]", "\n"));
+        sb.append("\n=== Untracked Files ===\n");
+        for(String f:stagingArea.filesUntracked()){
+            sb.append(f).append("\n");
+        }
 
         return sb.toString();
     }
