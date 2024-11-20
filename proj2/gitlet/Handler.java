@@ -157,25 +157,25 @@ public class Handler {
         repo.dump();
     }
 
-    static void merge(String branch){
+    static void merge(String branch) {
         Repository repo = loadRepository();
         StagingArea stagingArea = repo.stagingArea;
-        if(!stagingArea.filesStagedForRemoval().isEmpty() ||
-                !stagingArea.filesStaged().isEmpty()){
+        if (!stagingArea.filesStagedForRemoval().isEmpty() ||
+                !stagingArea.filesStaged().isEmpty()) {
             message("You have uncommitted changes.");
             return;
         }
-        if(repo.getReference(branch) == null){
+        if (repo.getReference(branch) == null) {
             message("A branch with that name does not exist.");
             return;
         }
-        if(branch.equals(repo.getCurrentBranch())){
+        if (branch.equals(repo.getCurrentBranch())) {
             message("Cannot merge a branch with itself.");
             return;
         }
-        if(!stagingArea.filesUnstagedForModification().isEmpty() ||
+        if (!stagingArea.filesUnstagedForModification().isEmpty() ||
                 !stagingArea.filesUnstagedForRemoval().isEmpty() ||
-                !stagingArea.filesUntracked().isEmpty()){
+                !stagingArea.filesUntracked().isEmpty()) {
             message("There is an untracked file in the way; " +
                     "delete it, or add and commit it first.");
             return;

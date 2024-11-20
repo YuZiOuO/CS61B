@@ -12,18 +12,18 @@ class Blob extends File {
     final byte[] content;
     private int refs;
 
-    private Blob(String hash, byte[] content){
+    private Blob(String hash, byte[] content) {
         super(join(BLOB_DIR, hash).getPath());
         this.content = content;
         this.hash = hash;
         refs = 1;
     }
 
-    static Blob push(byte[] content){
+    static Blob push(byte[] content) {
         String hash = sha1(content);
         File blob = new File(BLOB_DIR, hash);
         if (!blob.exists()) {
-            Blob b = new Blob(hash,content);
+            Blob b = new Blob(hash, content);
             b.dump();
             return b;
         } else {
@@ -50,8 +50,15 @@ class Blob extends File {
         refs++;
     }
 
+    /**
+     * Load a blob object with given hash.
+     * Throw an exception if hash is neither null nor a correct existing blob hash.
+     *
+     * @param hash the hash to load.
+     * @return null if hash is null,otherwise the corresponding blob.
+     */
     static Blob load(String hash) {
-        return readObject(join(BLOB_DIR, hash), Blob.class);
+        return hash == null ? null : readObject(join(BLOB_DIR, hash), Blob.class);
     }
 
     void dump() {

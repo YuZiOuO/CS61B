@@ -10,6 +10,7 @@
 !foods.csv
 !README.md
 !**.in
+!**.inc
 *.class
 *.log
 *.ctxt

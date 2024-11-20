@@ -25,18 +25,20 @@ public class Commit implements Serializable {
     final String hash;
     final List<String> parent;
 
-    Date getTimestamp(){
+    Date getTimestamp() {
         return (Date) timestamp.clone();
     }
+
     private final Date timestamp;
 
     public Map<String, String> getFiles() {
         return new HashMap<>(files);
     }
+
     private final Map<String, String> files;
 
     /* 直接提取StagingArea中的文件 */
-    Commit(String message, String[] parent, Date timestamp, Map<String, Blob> files){
+    Commit(String message, String[] parent, Date timestamp, Map<String, Blob> files) {
         this.message = message;
         this.parent = new ArrayList<>();
         this.parent.addAll(Arrays.asList(parent));
@@ -47,65 +49,65 @@ public class Commit implements Serializable {
 
     /**
      * Load a commit with given hash.
-     * The corresponding {@code Commit} mush been dumped in advance,
+     * The corresponding {@code Commit} mush been dumped in advance,Otherwise throw an error.
      *
      * @param hash the commit hash.
-     * @throws IllegalArgumentException if the corresponding commit files
-     * does not exist or can't be read.
      * @return null if {@code hash == null},otherwise the corresponding {@code Commit}.
+     * @throws IllegalArgumentException if the corresponding commit files
+     *                                  does not exist or can't be read.
      */
     static Commit load(String hash) {
-        return hash == null?null:Utils.readObject(join(COMMIT_DIR,hash), Commit.class);
+        return hash == null ? null : Utils.readObject(join(COMMIT_DIR, hash), Commit.class);
     }
 
     void dump() {
         Utils.writeObject(Utils.join(COMMIT_DIR, hash), this);
     }
 
-    private Map<String, String> cache(Map<String, Blob> files){
-        HashMap<String,String> _files = new HashMap<>();
+    private Map<String, String> cache(Map<String, Blob> files) {
+        HashMap<String, String> _files = new HashMap<>();
         for (String name : files.keySet()) {
             Blob b = files.get(name);
             b.ref();
-            _files.put(name,b.hash);
+            _files.put(name, b.hash);
             b.dump();
         }
         return _files;
     }
 
-    boolean contain(String name){
+    boolean contain(String name) {
         return files.containsKey(name);
     }
 
-    Blob getBlob(String name){
+    Blob getBlob(String name) {
         return Blob.load(files.get(name));
     }
 
     @Override
     public String toString() {
-        return "Commit@"+timestamp.toString()+"\nmessage:"+message+"\nparent:"+parent
-                +"\nfiles:"+files.toString();
+        return "Commit@" + timestamp.toString() + "\nmessage:" + message + "\nparent:" + parent
+                + "\nfiles:" + files.toString();
     }
 
-    String toLog(){
+    String toLog() {
         StringBuilder sb = new StringBuilder();
         Formatter f = new Formatter(sb, Locale.US);
         f.format("===\ncommit ").format(this.hash).format("\nDate: ")
-                .format("%1$ta %1$tb %1$td %1$tT %1$tY %1$tz\n",this.getTimestamp())
+                .format("%1$ta %1$tb %1$td %1$tT %1$tY %1$tz\n", this.getTimestamp())
                 .format(this.getMessage()).format("\n\n");
         return sb.toString();
     }
 
-    static Map<String,Blob> loadWorkTree(String commitHash){
-        Map<String,String> src = Commit.load(commitHash).files;
+    static Map<String, Blob> loadWorkTree(String commitHash) {
+        Map<String, String> src = Commit.load(commitHash).files;
         return loadWorkTree(src);
     }
 
-    static Map<String,Blob> loadWorkTree(Map<String,String> hashTree){
-        Map<String,Blob> dest = new HashMap<>();
-        for(String filename: hashTree.keySet()) {
+    static Map<String, Blob> loadWorkTree(Map<String, String> hashTree) {
+        Map<String, Blob> dest = new HashMap<>();
+        for (String filename : hashTree.keySet()) {
             Blob b = Blob.load(hashTree.get(filename));
-            dest.put(filename,b);
+            dest.put(filename, b);
         }
         return dest;
     }
@@ -122,10 +124,11 @@ public class Commit implements Serializable {
      * Traverse the commit tree using BFS,get a map from commits to their child
      * where commits are all entry's ancestors.
      * Asymptotic: O(n) where n is the number of {@code from}'s ancestor.
+     *
      * @param entry The entry of the traverse.
      * @return A map which maps commits to their parents.
      */
-    static Map<String,String> traverse(String entry){
+    static Map<String, String> traverse(String entry) {
         Queue<String> traversalQueue = new ArrayDeque<>();
         HashMap<String, String> childOf = new HashMap<>();
         HashSet<String> marked = new HashSet<>();
@@ -149,12 +152,13 @@ public class Commit implements Serializable {
 
     /**
      * Find the split point(defined in proj2 webpage) of two commits.
+     *
      * @return A string representing the split point hash.
      */
-    static String splitPoint(String commit1,String commit2){
-        Map<String,String> traversed = traverse(commit1);
+    static String splitPoint(String commit1, String commit2) {
+        Map<String, String> traversed = traverse(commit1);
         Commit iter = Commit.load(commit2);
-        while(traversed.get(iter.hash)==null){
+        while (traversed.get(iter.hash) == null) {
             iter = Commit.load(iter.parent.get(0));
         }
         return iter.hash;

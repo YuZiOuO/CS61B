@@ -1,4 +1,4 @@
-I definitions.inc
+I def-definitions.inc
 
 > init
 <<<
@@ -26,10 +26,19 @@ No reason to remove the file.
 > rm wug.txt
 <<<
 E wug.txt
-= wug.txt wug.txt
+= wug.txt notwug.txt
 
 # tracked -wug1.txt
 E wug1.txt
 > rm wug1.txt
 <<<
 * wug1.txt
+
+# newly added
++ wug3.txt wug3.txt
+> add wug3.txt
+<<<
+> rm wug3.txt
+<<<
+E wug3.txt
+= wug3.txt wug3.txt

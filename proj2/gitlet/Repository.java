@@ -50,10 +50,10 @@ public class Repository implements Serializable {
     }
 
     public void commit(String message, Date timestamp) {
-        multiParentCommit(message,timestamp,new String[]{refs.get(currentBranch)});
+        multiParentCommit(message, timestamp, new String[]{refs.get(currentBranch)});
     }
 
-    private void multiParentCommit(String message,Date timestamp,String[] parent) {
+    private void multiParentCommit(String message, Date timestamp, String[] parent) {
         Commit c = stagingArea.toCommit(message, parent, timestamp);
         refs.put(currentBranch, c.hash);
         commits.add(c.hash);
@@ -153,6 +153,7 @@ public class Repository implements Serializable {
     }
 
     //O(n) TODO:optimization
+
     /**
      * find if any hash of commits of this repository matches the given substring hash.
      * A naive implementation with asymptotic O(n).
@@ -186,56 +187,56 @@ public class Repository implements Serializable {
         }
 
         sb.append("\n=== Staged Files ===\n");
-        for(String f:stagingArea.filesStaged()){
+        for (String f : stagingArea.filesStaged()) {
             sb.append(f).append("\n");
         }
 
         sb.append("\n=== Removed Files ===\n");
-        for(String f:stagingArea.filesStagedForRemoval()){
+        for (String f : stagingArea.filesStagedForRemoval()) {
             sb.append(f).append("\n");
         }
 
         sb.append("\n=== Modifications Not Staged For Commit ==\n");
-        for(String f:stagingArea.filesUnstagedForRemoval()){
+        for (String f : stagingArea.filesUnstagedForRemoval()) {
             sb.append(f).append(" (deleted)\n");
         }
-        for(String f:stagingArea.filesUnstagedForModification()){
+        for (String f : stagingArea.filesUnstagedForModification()) {
             sb.append(f).append(" (modified)\n");
         }
 
         sb.append("\n=== Untracked Files ===\n");
-        for(String f:stagingArea.filesUntracked()){
+        for (String f : stagingArea.filesUntracked()) {
             sb.append(f).append("\n");
         }
 
         return sb.toString();
     }
 
-    void merge(String branch){
-        String splitPoint = Commit.splitPoint(refs.get(currentBranch),refs.get(branch));
-        if(splitPoint.equals(refs.get(branch))){
+    void merge(String branch) {
+        String splitPoint = Commit.splitPoint(refs.get(currentBranch), refs.get(branch));
+        if (splitPoint.equals(refs.get(branch))) {
             message("Given branch is an ancestor of the current branch.");
             refs.put(branch, refs.get(currentBranch));
-        }else if(splitPoint.equals(refs.get(currentBranch))){
+        } else if (splitPoint.equals(refs.get(currentBranch))) {
             message("Current branch fast-forwarded.");
             stagingArea.checkout(refs.get(branch));
             refs.put(currentBranch, refs.get(branch));
-        }else{
-            Map<String,Blob> splitTree = Commit.loadWorkTree(splitPoint);
-            Map<String,String> currentTree = Commit.load(getReference(currentBranch)).getFiles();
-            Map<String,String> givenTree = Commit.load(getReference(branch)).getFiles();
+        } else {
+            Map<String, Blob> splitTree = Commit.loadWorkTree(splitPoint);
+            Map<String, String> currentTree = Commit.load(getReference(currentBranch)).getFiles();
+            Map<String, String> givenTree = Commit.load(getReference(branch)).getFiles();
 
-            for(String f:givenTree.keySet()){
+            for (String f : givenTree.keySet()) {
                 String given = givenTree.get(f);
                 String current = currentTree.get(f);
-                if(current == null){
-                    if(splitTree.get(f) == null){
-                        currentTree.put(f,givenTree.get(f));
+                if (current == null) {
+                    if (splitTree.get(f) == null) {
+                        currentTree.put(f, givenTree.get(f));
                     }
-                }else{
-                    if(!current.equals(given)){
-                        Blob givenBlob = readObject(join(Blob.BLOB_DIR,given),Blob.class);
-                        Blob currentBlob = readObject(join(Blob.BLOB_DIR,current), Blob.class);
+                } else {
+                    if (!current.equals(given)) {
+                        Blob givenBlob = readObject(join(Blob.BLOB_DIR, given), Blob.class);
+                        Blob currentBlob = readObject(join(Blob.BLOB_DIR, current), Blob.class);
                         StringBuilder sb = new StringBuilder();
                         sb.append("<<<<<<< HEAD\n")
                                 .append(Arrays.toString(currentBlob.content))
@@ -248,16 +249,16 @@ public class Repository implements Serializable {
                 }
             }
 
-            for(String f:currentTree.keySet()){
-                if(splitTree.containsKey(f) && !givenTree.containsKey(f)){
+            for (String f : currentTree.keySet()) {
+                if (splitTree.containsKey(f) && !givenTree.containsKey(f)) {
                     currentTree.remove(f);
                 }
             }
 
-            stagingArea.checkout(refs.get(currentBranch),Commit.loadWorkTree(currentTree));
-            String[] parents = new String[]{refs.get(currentBranch),refs.get(branch)};
-            multiParentCommit("Merged "+branch+" into "+currentBranch + "."
-                    ,Date.from(Instant.now()),parents);
+            stagingArea.checkout(refs.get(currentBranch), Commit.loadWorkTree(currentTree));
+            String[] parents = new String[]{refs.get(currentBranch), refs.get(branch)};
+            multiParentCommit("Merged " + branch + " into " + currentBranch + "."
+                    , Date.from(Instant.now()), parents);
             refs.put(branch, refs.get(currentBranch));
         }
     }

@@ -15,10 +15,10 @@ class StagingArea implements Serializable {
 
     public void checkout(String commitHash) {
         Commit c = Commit.load(commitHash);
-        checkout(c.hash,Commit.loadWorkTree(c.hash));
+        checkout(c.hash, Commit.loadWorkTree(c.hash));
     }
 
-    void checkout(String prevCommitHash,Map<String, Blob> workTree) {
+    void checkout(String prevCommitHash, Map<String, Blob> workTree) {
         this.prevCommitHash = prevCommitHash;
         this.workTree = workTree;
         List<String> allFiles = plainFilenamesIn(Repository.CWD);
@@ -48,16 +48,19 @@ class StagingArea implements Serializable {
 
     void remove(String name) {
         File file = join(Repository.CWD, name);
-        Blob prev = Commit.load(prevCommitHash).getBlob(name);
+        Blob prev = Commit.load(prevCommitHash) == null
+                ? null : Commit.load(prevCommitHash).getBlob(name);
         Blob working = workTree.get(name);
-        if (working.hash.equals(prev.hash)) {
+        if (prev == null) {
+            // newly added
+            workTree.remove(name);
+        } else if (working.hash.equals(prev.hash)) {
             // tracked and not modified
             workTree.put(name, null);
             restrictedDelete(file);
         } else {
             // modified
             workTree.put(name, prev);
-            writeContents(file, prev.content);
             prev.ref();
         }
         working.pop();
@@ -65,14 +68,15 @@ class StagingArea implements Serializable {
 
     /**
      * Reset a file content to the staged or tracked version
+     *
      * @param filename The file to reset.
-     * @param blob A blob object,representing content of the file.
-     *             If null is passed,restore the staged version.
+     * @param blob     A blob object,representing content of the file.
+     *                 If null is passed,restore the staged version.
      */
     void restore(String filename, Blob blob) {
         File dest = join(Repository.CWD, filename);
         blob = (blob == null) ? workTree.get(filename) : blob;
-        if(blob != null) {
+        if (blob != null) {
             writeContents(dest, blob.content);
         }
     }
