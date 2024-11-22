@@ -1,0 +1,58 @@
+# split point on the traversed graph.
+> init
+<<<
+I setup-commit-once.inc
+
+# new branch is prev commit of current
+# i.e. Given branch is an ancestor of the current branch.
+> branch newbr
+<<<
++ wug2.txt wug2.txt
+> add wug2.txt
+<<<
+> commit wug2
+<<<
+> merge newbr
+Given branch is an ancestor of the current branch.
+<<<
+
+# new branch in plain position
+# i.e.plain case
++ wug3.txt wug3.txt
+> add wug3.txt
+<<<
+> commit wug3
+<<<
+> checkout newbr
+<<<
+> rm wug2.txt
+<<<
+> commit rm
+<<<
+> merge master
+<<<
+
+
+# split point is current branch
+# i.e. fast-forward.
++ notwug.txt notwug.txt
+> add notwug.txt
+<<<
+> commit not
+<<<
+> checkout master
+<<<
+> merge newbr
+Current branch fast-forwarded.
+<<<
+E notwug.txt
+
+# merge a ref with same position
+# operation defined by project guide
+> merge newbr
+Given branch is an ancestor of the current branch.
+<<<
+
+
+
+

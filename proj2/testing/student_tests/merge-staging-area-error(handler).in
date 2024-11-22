@@ -1,0 +1,54 @@
+> init
+<<<
+>branch newbr
+<<<
+I setup-commit-once.inc
+
+# un committed changes
+> rm once
+<<<
+> merge newbr
+You have uncommitted changes.
+<<<
+> add once
+<<<
++ wug.txt wug.txt
+> add wug.txt
+<<<
+> merge newbr
+You have uncommitted changes.
+<<<
+> rm wug.txt
+<<<
+
+# unstaged changes
+> merge newbr
+There is an untracked file in the way; delete it, or add and commit it first.
+<<<
+- wug.txt
+- once
+> merge newbr
+There is an untracked file in the way; delete it, or add and commit it first.
+<<<
++ once wug.txt
+> merge newbr
+There is an untracked file in the way; delete it, or add and commit it first.
+<<<
++ once commit-once.txt
+> merge newbr
+Given branch is an ancestor of the current branch.
+<<<
+
+# nonexisting branch
+> merge non
+A branch with that name does not exist.
+<<<
+
+# merge self
+> merge master
+Cannot merge a branch with itself.
+<<<
+
+
+
+

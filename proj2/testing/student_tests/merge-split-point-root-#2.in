@@ -1,0 +1,20 @@
+# # split point is root,new branch on another path
+> init
+<<<
+> branch newbr
+<<<
+I setup-commit-once.inc
+
+
+
+> checkout newbr
+<<<
++ wug1.txt wug1.txt
+> add wug1.txt
+<<<
+> commit "new"
+<<<
+> checkout master
+<<<
+> merge newbr
+<<<

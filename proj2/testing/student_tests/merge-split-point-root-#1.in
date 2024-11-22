@@ -1,0 +1,10 @@
+# split point is root,new branch on root
+
+> init
+<<<
+> branch newbr
+<<<
+I setup-commit-once.inc
+> merge newbr
+Given branch is an ancestor of the current branch.
+<<<
