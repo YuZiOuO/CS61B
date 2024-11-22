@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
-import static gitlet.Utils.*;
+import static gitlet.Utils.join;
+import static gitlet.Utils.sha1;
 
 /**
  * Represents a gitlet commit object.
@@ -126,7 +127,7 @@ public class Commit implements Serializable {
      * Asymptotic: O(n) where n is the number of {@code from}'s ancestor.
      *
      * @param entry The entry of the traverse.
-     * @return A map which maps commits to their parents.
+     * @return A map which maps commits to their child.Entry is mapped to itself.
      */
     static Map<String, String> traverse(String entry) {
         Queue<String> traversalQueue = new ArrayDeque<>();
@@ -134,7 +135,7 @@ public class Commit implements Serializable {
         HashSet<String> marked = new HashSet<>();
 
         traversalQueue.add(entry);
-        childOf.put(entry, null);
+        childOf.put(entry, entry);
 
         while (!traversalQueue.isEmpty()) {
             String current = traversalQueue.poll();
