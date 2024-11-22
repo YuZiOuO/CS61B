@@ -6,7 +6,7 @@ import java.util.*;
 
 import static gitlet.Utils.*;
 
-// the abstract of CWD and stagingArea Files.
+// the abstract of CWD and stagingArea Files(Working Tree).
 class StagingArea implements Serializable {
     public static final String STAGING_AREA_FILENAME = Repository.STAGING_AREA_FILENAME;
 
@@ -37,12 +37,26 @@ class StagingArea implements Serializable {
         workTree = new HashMap<>();
     }
 
-    void add(String name) {
+    /**
+     * Update the working Tree in the following steps:<br>
+     * 1.if the file given by {@code name} is not null in the current working tree,
+     * push the current version,and pop the working version if necessary.<br>
+     * 2.if the file is null (i.e.staged for removal),just modify the working tree.
+     *
+     * @param name the file name to update.
+     */
+    void push(String name) {
         File src = join(Repository.CWD, name);
         Blob working = workTree.get(name);
-        workTree.put(name, Blob.push(src));
-        if (working != null) {
-            working.pop();
+        if (workTree.containsKey(name) && working == null) {
+            Blob b = Blob.load(Commit.load(prevCommitHash).getFiles().get(name));
+            workTree.put(name, b);
+            b.ref();
+        } else {
+            workTree.put(name, Blob.push(src));
+            if (working != null) {
+                working.pop();
+            }
         }
     }
 

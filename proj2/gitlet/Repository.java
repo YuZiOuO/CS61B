@@ -249,11 +249,8 @@ public class Repository implements Serializable {
                 }
             }
 
-            for (String f : currentTree.keySet()) {
-                if (splitTree.containsKey(f) && !givenTree.containsKey(f)) {
-                    currentTree.remove(f);
-                }
-            }
+            currentTree.entrySet().removeIf(
+                    f -> splitTree.containsKey(f.getKey()) && !givenTree.containsKey(f.getKey()));
 
             stagingArea.checkout(refs.get(currentBranch), Commit.loadWorkTree(currentTree));
             String[] parents = new String[]{refs.get(currentBranch), refs.get(branch)};

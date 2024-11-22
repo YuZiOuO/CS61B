@@ -4,7 +4,8 @@ import java.io.File;
 import java.time.Instant;
 import java.util.Date;
 
-import static gitlet.Utils.*;
+import static gitlet.Utils.join;
+import static gitlet.Utils.message;
 
 public class Handler {
     public static final File CWD = new File(System.getProperty("user.dir"));
@@ -36,7 +37,7 @@ public class Handler {
                 return;
             }
         }
-        staging.add(name);
+        staging.push(name);
         repo.dump();
     }
 
