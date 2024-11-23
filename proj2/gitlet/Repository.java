@@ -50,10 +50,10 @@ public class Repository implements Serializable {
     }
 
     public void commit(String message, Date timestamp) {
-        multiParentCommit(message, timestamp, new String[]{refs.get(currentBranch)});
+        commit(message, timestamp, new String[]{refs.get(currentBranch)});
     }
 
-    private void multiParentCommit(String message, Date timestamp, String[] parent) {
+    private void commit(String message, Date timestamp, String[] parent) {
         Commit c = stagingArea.toCommit(message, parent, timestamp);
         refs.put(currentBranch, c.hash);
         commits.add(c.hash);
@@ -171,7 +171,7 @@ public class Repository implements Serializable {
         return null;
     }
 
-    String getReference(String ref) {
+    String getRef(String ref) {
         return refs.get(ref);
     }
 
@@ -222,41 +222,58 @@ public class Repository implements Serializable {
             stagingArea.checkout(refs.get(branch));
             refs.put(currentBranch, refs.get(branch));
         } else {
-            Map<String, Blob> splitTree = Commit.loadWorkTree(splitPoint);
-            Map<String, String> currentTree = Commit.load(getReference(currentBranch)).getFiles();
-            Map<String, String> givenTree = Commit.load(getReference(branch)).getFiles();
+            Map<String, String> splitTree = Commit.load(splitPoint).getFiles();
+            Map<String, String> currentTree = Commit.load(refs.get(currentBranch)).getFiles();
+            Map<String, String> givenTree = Commit.load(refs.get(branch)).getFiles();
 
-            for (String f : givenTree.keySet()) {
-                String given = givenTree.get(f);
-                String current = currentTree.get(f);
-                if (current == null) {
-                    if (splitTree.get(f) == null) {
-                        currentTree.put(f, givenTree.get(f));
-                    }
-                } else {
-                    if (!current.equals(given)) {
-                        Blob givenBlob = readObject(join(Blob.BLOB_DIR, given), Blob.class);
-                        Blob currentBlob = readObject(join(Blob.BLOB_DIR, current), Blob.class);
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("<<<<<<< HEAD\n")
-                                .append(Arrays.toString(currentBlob.content))
-                                .append("=======\n")
-                                .append(Arrays.toString(givenBlob.content))
-                                .append(">>>>>>>\n");
-                        Blob conflict = Blob.push(sb.toString().getBytes());
-                        currentTree.put(f, conflict.hash);
-                    }
-                }
-            }
-
-            currentTree.entrySet().removeIf(
-                    f -> splitTree.containsKey(f.getKey()) && !givenTree.containsKey(f.getKey()));
+            currentTree = mergeTree(splitTree, currentTree, givenTree);
 
             stagingArea.checkout(refs.get(currentBranch), Commit.loadWorkTree(currentTree));
             String[] parents = new String[]{refs.get(currentBranch), refs.get(branch)};
-            multiParentCommit("Merged " + branch + " into " + currentBranch + "."
+            commit("Merged " + branch + " into " + currentBranch + "."
                     , Date.from(Instant.now()), parents);
             refs.put(branch, refs.get(currentBranch));
         }
+    }
+
+    Map<String, String> mergeTree(Map<String, String> splitTree,
+                                  Map<String, String> currentTree,
+                                  Map<String, String> givenTree) {
+        boolean encounterMergeConflict = false;
+
+        for (String f : givenTree.keySet()) {
+            String split = splitTree.get(f);
+            String given = givenTree.get(f);
+            String current = currentTree.get(f);
+            if (current == null) {
+                if (splitTree.get(f) == null) {
+                    currentTree.put(f, givenTree.get(f));
+                }
+            } else if (!current.equals(given)) {
+                if (current.equals(split)) {
+                    // modified only in given.
+                    currentTree.put(f, givenTree.get(f));
+                } else if (!given.equals(split)) {
+                    encounterMergeConflict = true;
+                    Blob givenBlob = readObject(join(Blob.BLOB_DIR, given), Blob.class);
+                    Blob currentBlob = readObject(join(Blob.BLOB_DIR, current), Blob.class);
+                    String s = "<<<<<<< HEAD\n" +
+                            new String(currentBlob.content) +
+                            "=======\n" +
+                            new String(givenBlob.content) +
+                            ">>>>>>>";
+                    Blob conflict = Blob.push(s.getBytes());
+                    currentTree.put(f, conflict.hash);
+                }
+            }
+        }
+
+        currentTree.entrySet().removeIf(
+                f -> splitTree.containsKey(f.getKey()) && !givenTree.containsKey(f.getKey()));
+
+        if (encounterMergeConflict) {
+            message("Encountered a merge conflict.");
+        }
+        return currentTree;
     }
 }

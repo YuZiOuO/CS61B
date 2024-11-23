@@ -1,0 +1,85 @@
+> init
+<<<
+
+# a.txt : in split,modified in given.(1)
+# b.txt : in split,modified in current.(2)
+# c.txt : in split,modified by both in the same way.(3)
+# d.txt : in split,untracked by both,but in working dir. - left alone,not merged.(3) TODO:it's recognized as untracked and merge crashed
+# e.txt : newly added to current.(4)
+# f.txt : newly added to given.(5)
+# g.txt : removed by given.(6)
+# h.txt : removed by current.(7)
+
++ a.txt wug.txt
++ b.txt wug.txt
++ c.txt wug.txt
++ d.txt wug.txt
++ g.txt wug.txt
++ h.txt wug.txt
+> add a.txt
+<<<
+> add b.txt
+<<<
+> add c.txt
+<<<
+> add d.txt
+<<<
+> add g.txt
+<<<
+> add h.txt
+<<<
+> commit setup
+<<<
+
+> branch br
+<<<
+
++ b.txt notwug.txt
+> add b.txt
+<<<
++ c.txt notwug.txt
+> add c.txt
+<<<
+> rm d.txt
+<<<
++ e.txt wug.txt
+> add e.txt
+<<<
+> rm h.txt
+<<<
+> commit master
+<<<
+
+> checkout br
+<<<
++ a.txt notwug.txt
+> add a.txt
+<<<
++ c.txt notwug.txt
+> add c.txt
+<<<
+> rm d.txt
+<<<
++ f.txt wug.txt
+> add f.txt
+<<<
+> rm g.txt
+<<<
+> commit br
+<<<
+
+> checkout master
+<<<
+#+ d.txt wug.txt
+> merge br
+<<<
+
+= a.txt notwug.txt
+= b.txt notwug.txt
+= c.txt notwug.txt
+#= d.txt wug.txt
+= e.txt wug.txt
+= f.txt wug.txt
+* g.txt
+* h.txt
+

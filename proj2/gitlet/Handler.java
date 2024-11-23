@@ -89,7 +89,7 @@ public class Handler {
         Repository repo = loadRepository();
         if (repo.getCurrentBranch().equals(branch)) {
             message("No need to checkout the current branch.");
-        } else if (repo.getReference(branch) == null) {
+        } else if (repo.getRef(branch) == null) {
             message("No such branch exists.");
         } else {
             repo.checkoutBranch(branch);
@@ -116,7 +116,7 @@ public class Handler {
 
     static void branch(String name) {
         Repository repo = loadRepository();
-        if (repo.getReference(name) != null) {
+        if (repo.getRef(name) != null) {
             message("A branch with that name already exists.");
         } else {
             repo.createBranch(name);
@@ -126,7 +126,7 @@ public class Handler {
 
     static void rmBranch(String name) {
         Repository repo = loadRepository();
-        if (repo.getReference(name) == null) {
+        if (repo.getRef(name) == null) {
             message("A branch with that name does not exist.");
         } else if (name.equals(repo.getCurrentBranch())) {
             message("Cannot remove the current branch.");
@@ -166,7 +166,7 @@ public class Handler {
             message("You have uncommitted changes.");
             return;
         }
-        if (repo.getReference(branch) == null) {
+        if (repo.getRef(branch) == null) {
             message("A branch with that name does not exist.");
             return;
         }

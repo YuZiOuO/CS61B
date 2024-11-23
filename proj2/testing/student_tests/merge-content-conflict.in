@@ -1,0 +1,28 @@
+> init
+<<<
+
+> branch br
+<<<
+
++ a.txt merge-file-a.txt
+> add a.txt
+<<<
+> commit commit@master
+<<<
+
+> checkout br
+<<<
++ a.txt merge-file-b.txt
+> add a.txt
+<<<
+> commit commit@br
+<<<
+
+> checkout master
+<<<
+> merge br
+Encountered a merge conflict.
+<<<
+
+E a.txt
+= a.txt merge-file-conflict.txt
