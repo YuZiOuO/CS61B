@@ -9,10 +9,10 @@ import static gitlet.Utils.message;
 
 public class Handler {
     public static final File CWD = new File(System.getProperty("user.dir"));
-    public static final File GITLET_DIR = join(CWD, ".gitlet");
+    public static final File GITLET_DIR = join(CWD, Config.GITLET_DIR_NAME);
 
     static Repository loadRepository() {
-        return Repository.load(join(GITLET_DIR, Repository.REPO_FILENAME));
+        return Repository.load(join(GITLET_DIR, Config.REPO_FILENAME));
     }
 
     static void init() {

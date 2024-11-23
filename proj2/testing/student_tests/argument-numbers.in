@@ -1,1 +1,86 @@
-# TODO
+>
+Please enter a command.
+<<<
+
+> non-existing-command
+No command with that name exists.
+<<<
+
+> init haha
+Incorrect operands.
+<<<
+
+> commit
+Not in an initialized Gitlet directory.
+<<<
+
+> init
+<<<
+
+> checkout
+Incorrect operands.
+<<<
+
+> init se
+Incorrect operands.
+<<<
+
+> log dwa
+Incorrect operands.
+<<<
+
+> status dj
+Incorrect operands.
+<<<
+
+> global-log daw
+Incorrect operands.
+<<<
+
+> add a b
+Incorrect operands.
+<<<
+
+> branch ab cd
+Incorrect operands.
+<<<
+
+> rm-branch ab cd
+Incorrect operands.
+<<<
+
+> find
+Incorrect operands.
+<<<
+> find ab cd
+Incorrect operands.
+<<<
+
+> rm
+Incorrect operands.
+<<<
+> rm ab cd
+Incorrect operands.
+<<<
+
+> reset
+Incorrect operands.
+<<<
+> reset ab cd
+Incorrect operands.
+<<<
+
+> merge
+Incorrect operands.
+<<<
+> merge ab cd
+Incorrect operands.
+<<<
+
+> commit ab cd ef
+Incorrect operands.
+<<<
+
+> checkout a b c d
+Incorrect operands.
+<<<

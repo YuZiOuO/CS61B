@@ -8,7 +8,6 @@ import static gitlet.Utils.*;
 
 // the abstract of CWD and stagingArea Files(Working Tree).
 class StagingArea implements Serializable {
-    public static final String STAGING_AREA_FILENAME = Repository.STAGING_AREA_FILENAME;
 
     private String prevCommitHash;
     private Map<String, Blob> workTree;
@@ -107,12 +106,12 @@ class StagingArea implements Serializable {
     }
 
     static StagingArea load() {
-        return readObject(join(Repository.GITLET_DIR, STAGING_AREA_FILENAME)
+        return readObject(join(Repository.GITLET_DIR, Config.STAGING_AREA_FILENAME)
                 , StagingArea.class);
     }
 
     void dump() {
-        writeObject(join(Repository.GITLET_DIR, STAGING_AREA_FILENAME), this);
+        writeObject(join(Repository.GITLET_DIR, Config.STAGING_AREA_FILENAME), this);
     }
 
     boolean contains(String filename) {

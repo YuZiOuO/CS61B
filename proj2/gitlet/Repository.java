@@ -19,15 +19,11 @@ public class Repository implements Serializable {
     /**
      * The current working directory.
      */
-    public static final File CWD = new File(System.getProperty("user.dir"));
+    public static final File CWD = Handler.CWD;
     /**
      * The .gitlet directory.
      */
-    public static final File GITLET_DIR = join(CWD, ".gitlet");
-
-    public static final String REPO_FILENAME = "repo";
-    public static final String STAGING_AREA_FILENAME = "staged";
-    public static final String INITIAL_COMMIT_MESSAGE = "initial commit";
+    public static final File GITLET_DIR = Handler.GITLET_DIR;
 
     private String currentBranch;
 
@@ -45,7 +41,7 @@ public class Repository implements Serializable {
         commits = new TreeSet<>();
         stagingArea = new StagingArea();
         if (Commit.COMMIT_DIR.mkdirs() && Blob.BLOB_DIR.mkdirs()) {
-            commit(INITIAL_COMMIT_MESSAGE, Date.from(Instant.EPOCH));
+            commit(Config.INITIAL_COMMIT_MESSAGE, Date.from(Instant.EPOCH));
         }
     }
 
@@ -69,7 +65,7 @@ public class Repository implements Serializable {
     void dump() {
         stagingArea.dump();
         stagingArea = null;
-        writeObject(join(GITLET_DIR, REPO_FILENAME), this);
+        writeObject(join(GITLET_DIR, Config.REPO_FILENAME), this);
     }
 
     /**
