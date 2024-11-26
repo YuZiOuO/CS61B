@@ -7,6 +7,9 @@ import java.util.Date;
 import static gitlet.Utils.join;
 import static gitlet.Utils.message;
 
+/**
+ * Helper method,invoke methods from the gitlet package.
+ */
 public class Handler {
     public static final File CWD = new File(System.getProperty("user.dir"));
     public static final File GITLET_DIR = join(CWD, Config.GITLET_DIR_NAME);
@@ -91,6 +94,8 @@ public class Handler {
             message("No need to checkout the current branch.");
         } else if (repo.getRef(branch) == null) {
             message("No such branch exists.");
+        } else if (!repo.stagingArea.filesUntracked().isEmpty()) {
+            message("There is an untracked file in the way; delete it, or add and commit it first.");
         } else {
             repo.checkoutBranch(branch);
         }
@@ -141,11 +146,10 @@ public class Handler {
         hash = repo.getCommitHash(hash);
         if (hash == null) {
             message("No commit with that id exists.");
-        } else if (!repo.stagingArea.filesStaged().isEmpty()
-                || !repo.stagingArea.filesStagedForRemoval().isEmpty()) {
+        } else if (!repo.stagingArea.filesUntracked().isEmpty()) {
             message(
-                    "There is an untracked file in the way; " +
-                            "delete it, or add and commit it first.");
+                    "There is an untracked file in the way;"
+                            + " delete it, or add and commit it first.");
         } else {
             repo.reset(hash);
         }
@@ -161,8 +165,8 @@ public class Handler {
     static void merge(String branch) {
         Repository repo = loadRepository();
         StagingArea stagingArea = repo.stagingArea;
-        if (!stagingArea.filesStagedForRemoval().isEmpty() ||
-                !stagingArea.filesStaged().isEmpty()) {
+        if (!stagingArea.filesStagedForRemoval().isEmpty()
+                || !stagingArea.filesStaged().isEmpty()) {
             message("You have uncommitted changes.");
             return;
         }
@@ -174,11 +178,11 @@ public class Handler {
             message("Cannot merge a branch with itself.");
             return;
         }
-        if (!stagingArea.filesUnstagedForModification().isEmpty() ||
-                !stagingArea.filesUnstagedForRemoval().isEmpty() ||
-                !stagingArea.filesUntracked().isEmpty()) {
-            message("There is an untracked file in the way; " +
-                    "delete it, or add and commit it first.");
+        if (!stagingArea.filesUnstagedForModification().isEmpty()
+                || !stagingArea.filesUnstagedForRemoval().isEmpty()
+                || !stagingArea.filesUntracked().isEmpty()) {
+            message("There is an untracked file in the way;"
+                    + " delete it, or add and commit it first.");
             return;
         }
         repo.merge(branch);

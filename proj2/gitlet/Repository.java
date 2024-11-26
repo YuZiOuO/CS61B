@@ -76,7 +76,8 @@ public class Repository implements Serializable {
      * @param name   The file name.
      */
     void checkoutCherryPickFile(String name, String commit) {
-        stagingArea.restore(name, commit == null ? null : Commit.load(commit).getBlob(name));
+        stagingArea.restore(name, commit == null ?
+                null : Blob.load(Commit.load(commit).getFiles().get(name)));
     }
 
     /**
@@ -139,6 +140,9 @@ public class Repository implements Serializable {
             if (msg.contains(string)) {
                 sb.append(c.hash).append("\n");
             }
+        }
+        if (sb.toString().isEmpty()) {
+            sb.append("Found no commit with that message.");
         }
         return sb.toString();
     }

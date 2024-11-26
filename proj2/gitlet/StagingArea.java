@@ -6,17 +6,42 @@ import java.util.*;
 
 import static gitlet.Utils.*;
 
-// the abstract of CWD and stagingArea Files(Working Tree).
+
+/**
+ * the abstract of CWD and stagingArea Files(Working Tree).
+ */
 class StagingArea implements Serializable {
 
-    private String prevCommitHash;
+    /**
+     * The tree representing current staged files.
+     */
     private Map<String, Blob> workTree;
+    /**
+     * The previous commit hash relative to the current work tree.
+     */
+    private String prevCommitHash;
 
+    StagingArea() {
+        prevCommitHash = null;
+        workTree = new HashMap<>();
+    }
+
+    /**
+     * Checkout to the given commit hash.
+     *
+     * @param commitHash the commit to checkout.
+     */
     public void checkout(String commitHash) {
         Commit c = Commit.load(commitHash);
         checkout(c.hash, Commit.loadWorkTree(c.hash));
     }
 
+    /**
+     * Checkout to the given work tree,restore all files in the CWD.
+     *
+     * @param prevCommitHash the previous commit hash relative to current tree.
+     * @param workTree       the tree of form <String,Blob> to checkout.
+     */
     void checkout(String prevCommitHash, Map<String, Blob> workTree) {
         this.prevCommitHash = prevCommitHash;
         this.workTree = workTree;
@@ -29,11 +54,6 @@ class StagingArea implements Serializable {
         for (String file : workTree.keySet()) {
             restore(file, null);
         }
-    }
-
-    StagingArea() {
-        prevCommitHash = null;
-        workTree = new HashMap<>();
     }
 
     /**
@@ -59,10 +79,15 @@ class StagingArea implements Serializable {
         }
     }
 
+    /**
+     * Remove a file from the staging area.
+     *
+     * @param name the file to remove.
+     */
     void remove(String name) {
         File file = join(Repository.CWD, name);
         Blob prev = Commit.load(prevCommitHash) == null
-                ? null : Commit.load(prevCommitHash).getBlob(name);
+                ? null : Blob.load(Commit.load(prevCommitHash).getFiles().get(name));
         Blob working = workTree.get(name);
         if (prev == null) {
             // newly added
@@ -94,6 +119,14 @@ class StagingArea implements Serializable {
         }
     }
 
+    /**
+     * Convert currently staged files to a commit.
+     *
+     * @param message   the commit message
+     * @param parent    the commit parent to track
+     * @param timestamp the commit time
+     * @return a commit object
+     */
     Commit toCommit(String message, String[] parent, Date timestamp) {
         // delete the file if staged for removal
         workTree.entrySet().removeIf(entry -> entry.getValue() == null);
@@ -105,19 +138,22 @@ class StagingArea implements Serializable {
         return c;
     }
 
-    static StagingArea load() {
-        return readObject(join(Repository.GITLET_DIR, Config.STAGING_AREA_FILENAME)
-                , StagingArea.class);
-    }
-
-    void dump() {
-        writeObject(join(Repository.GITLET_DIR, Config.STAGING_AREA_FILENAME), this);
-    }
-
+    /**
+     * Test if the given the file is tracked.
+     *
+     * @param filename the file to test
+     * @return whether the file is in the staging area.
+     */
     boolean contains(String filename) {
         return filename != null && workTree.containsKey(filename);
     }
 
+    /**
+     * Test if the given file is staged for removal.
+     *
+     * @param filename the file to test.
+     * @return whether it is staged for removal.
+     */
     boolean fileStagedForRemoval(String filename) {
         Commit prev = Commit.load(prevCommitHash);
         return !(prev == null)
@@ -140,6 +176,9 @@ class StagingArea implements Serializable {
         return staged;
     }
 
+    /**
+     * @return Files that are staged for removal.
+     */
     Set<String> filesStagedForRemoval() {
         HashSet<String> stagedForRemoval = new HashSet<>();
         for (String filename : workTree.keySet()) {
@@ -151,6 +190,9 @@ class StagingArea implements Serializable {
         return stagedForRemoval;
     }
 
+    /**
+     * @return Files that were removed manually and not logged by the rm command.
+     */
     Set<String> filesUnstagedForRemoval() {
         HashSet<String> unstagedForRemoval = new HashSet<>();
         for (String filename : workTree.keySet()) {
@@ -162,6 +204,9 @@ class StagingArea implements Serializable {
         return unstagedForRemoval;
     }
 
+    /**
+     * @return Files that were modified and unstaged.
+     */
     Set<String> filesUnstagedForModification() {
         HashSet<String> modified = new HashSet<>();
         for (String filename : workTree.keySet()) {
@@ -176,6 +221,10 @@ class StagingArea implements Serializable {
         return modified;
     }
 
+    /**
+     * @return A set of names of files that is untracked ,
+     * i.e. neither newly staged nor tracked by the previous commit.
+     */
     Set<String> filesUntracked() {
         HashSet<String> untracked = new HashSet<>();
         List<String> allFiles = plainFilenamesIn(Repository.CWD);
@@ -187,5 +236,22 @@ class StagingArea implements Serializable {
             }
         }
         return untracked;
+    }
+
+    /**
+     * Load the staging area.
+     *
+     * @return a StagingArea object.
+     */
+    static StagingArea load() {
+        return readObject(join(Repository.GITLET_DIR, Config.STAGING_AREA_FILENAME)
+                , StagingArea.class);
+    }
+
+    /**
+     * Dump this StagingArea object to file and save.
+     */
+    void dump() {
+        writeObject(join(Repository.GITLET_DIR, Config.STAGING_AREA_FILENAME), this);
     }
 }
