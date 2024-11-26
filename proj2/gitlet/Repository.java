@@ -258,7 +258,7 @@ public class Repository implements Serializable {
                             (currentBlob == null ? "" : new String(currentBlob.content)) +
                             "=======\n" +
                             (givenBlob == null ? "" : new String(givenBlob.content)) +
-                            ">>>>>>>";
+                            ">>>>>>>\n";
                     Blob conflict = Blob.push(s.getBytes());
                     currentTree.put(f, conflict.hash);
                 }
