@@ -32,8 +32,8 @@ class StagingArea implements Serializable {
      * @return a StagingArea object.
      */
     static StagingArea load() {
-        return readObject(join(Repository.GITLET_DIR, Config.STAGING_AREA_FILENAME)
-                , StagingArea.class);
+        return readObject(
+                join(Repository.GITLET_DIR, Config.STAGING_AREA_FILENAME), StagingArea.class);
     }
 
     /**
@@ -72,19 +72,19 @@ class StagingArea implements Serializable {
     /**
      * Checkout to the given work tree,restore all files in the CWD.
      *
-     * @param prevCommitHash the previous commit hash relative to current tree.
-     * @param workTree       the tree of form <String,Blob> to checkout.
+     * @param previousCommitHash the previous commit hash relative to current tree.
+     * @param newWorkTree       the tree of form <String,Blob> to checkout.
      */
-    void checkout(String prevCommitHash, Map<String, Blob> workTree) {
-        this.prevCommitHash = prevCommitHash;
-        this.workTree = workTree;
+    void checkout(String previousCommitHash, Map<String, Blob> newWorkTree) {
+        this.prevCommitHash = previousCommitHash;
+        this.workTree = newWorkTree;
         List<String> allFiles = plainFilenamesIn(Repository.CWD);
         if (allFiles != null) {
             for (String file : allFiles) {
                 restrictedDelete(join(Repository.CWD, file));
             }
         }
-        for (String file : workTree.keySet()) {
+        for (String file : newWorkTree.keySet()) {
             restore(file, null);
         }
     }

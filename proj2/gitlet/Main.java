@@ -24,12 +24,12 @@ public class Main {
             System.exit(0);
         }
 
-        if (!Config.arguments.containsKey(args[0])) {
+        if (!Config.ARGUMENT_CONFIG.containsKey(args[0])) {
             message("No command with that name exists.");
             System.exit(0);
         }
 
-        if (!Config.arguments.get(args[0]).contains(args.length)) {
+        if (!Config.ARGUMENT_CONFIG.get(args[0]).contains(args.length)) {
             message("Incorrect operands.");
             System.exit(0);
         }

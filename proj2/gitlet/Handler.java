@@ -95,7 +95,8 @@ public class Handler {
         } else if (repo.getRef(branch) == null) {
             message("No such branch exists.");
         } else if (!repo.stagingArea.filesUntracked().isEmpty()) {
-            message("There is an untracked file in the way; delete it, or add and commit it first.");
+            message("There is an untracked file in the way;"
+                    + " delete it, or add and commit it first.");
         } else {
             repo.checkoutBranch(branch);
         }

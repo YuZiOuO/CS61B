@@ -9,10 +9,6 @@ import static gitlet.Utils.*;
 
 /**
  * Represents a gitlet repository.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
- *
- * @author CYZ
  */
 public class Repository implements Serializable {
 
@@ -76,8 +72,8 @@ public class Repository implements Serializable {
      * @param name   The file name.
      */
     void checkoutCherryPickFile(String name, String commit) {
-        stagingArea.restore(name, commit == null ?
-                null : Blob.load(Commit.load(commit).getFiles().get(name)));
+        stagingArea.restore(name, commit == null
+                ? null : Blob.load(Commit.load(commit).getFiles().get(name)));
     }
 
     /**
@@ -114,10 +110,10 @@ public class Repository implements Serializable {
     }
 
     String globalLog() {
-        List<String> commits = plainFilenamesIn(Commit.COMMIT_DIR);
+        List<String> commit = plainFilenamesIn(Commit.COMMIT_DIR);
         StringBuilder sb = new StringBuilder();
-        if (commits != null) {
-            for (String n : commits) {
+        if (commit != null) {
+            for (String n : commit) {
                 sb.append(Commit.load(n).toLog());
             }
         }
@@ -152,11 +148,9 @@ public class Repository implements Serializable {
         stagingArea.checkout(commitHash);
     }
 
-    //O(n) TODO:optimization
-
     /**
      * find if any hash of commits of this repository matches the given substring hash.
-     * A naive implementation with asymptotic O(n).
+     * A naive implementation with asymptotic O(n) where n is the total amount of commits.
      * Should be invoked only at higher layer.
      *
      * @param source @NotNull the substring hash.
@@ -254,11 +248,11 @@ public class Repository implements Serializable {
                     encounterMergeConflict = true;
                     Blob givenBlob = Blob.load(given);
                     Blob currentBlob = Blob.load(current);
-                    String s = "<<<<<<< HEAD\n" +
-                            (currentBlob == null ? "" : new String(currentBlob.content)) +
-                            "=======\n" +
-                            (givenBlob == null ? "" : new String(givenBlob.content)) +
-                            ">>>>>>>\n";
+                    String s = "<<<<<<< HEAD\n"
+                            + (currentBlob == null ? "" : new String(currentBlob.content))
+                            + "=======\n"
+                            + (givenBlob == null ? "" : new String(givenBlob.content))
+                            + ">>>>>>>\n";
                     Blob conflict = Blob.push(s.getBytes());
                     currentTree.put(f, conflict.hash);
                 }
@@ -283,5 +277,4 @@ public class Repository implements Serializable {
             return aIsNull || a.equals(b);
         }
     }
-
 }

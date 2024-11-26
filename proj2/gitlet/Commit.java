@@ -105,18 +105,17 @@ public class Commit implements Serializable {
     /**
      * Interacting with the Blob class,cached all files in the given tree to blob.
      *
-     * @param files the file tree.
      * @return a map from file name to the cached blob hash.
      */
-    private Map<String, String> cache(Map<String, Blob> files) {
-        HashMap<String, String> _files = new HashMap<>();
-        for (String name : files.keySet()) {
-            Blob b = files.get(name);
+    private Map<String, String> cache(Map<String, Blob> fileTree) {
+        HashMap<String, String> cachedTree = new HashMap<>();
+        for (String name : fileTree.keySet()) {
+            Blob b = fileTree.get(name);
             b.ref();
-            _files.put(name, b.hash);
+            cachedTree.put(name, b.hash);
             b.dump();
         }
-        return _files;
+        return cachedTree;
     }
 
     /**
