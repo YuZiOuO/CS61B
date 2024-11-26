@@ -226,9 +226,9 @@ public class Repository implements Serializable {
             Map<String, String> currentTree = Commit.load(refs.get(currentBranch)).getFiles();
             Map<String, String> givenTree = Commit.load(refs.get(branch)).getFiles();
 
-            currentTree = mergeTree(splitTree, currentTree, givenTree);
+            Map<String, String> newTree = mergeTree(splitTree, currentTree, givenTree);
 
-            stagingArea.checkout(refs.get(currentBranch), Commit.loadWorkTree(currentTree));
+            stagingArea.checkout(refs.get(currentBranch), Commit.loadWorkTree(newTree));
             String[] parents = new String[]{refs.get(currentBranch), refs.get(branch)};
             commit("Merged " + branch + " into " + currentBranch + "."
                     , Date.from(Instant.now()), parents);
@@ -236,44 +236,52 @@ public class Repository implements Serializable {
         }
     }
 
-    Map<String, String> mergeTree(Map<String, String> splitTree,
+    private Map<String, String> mergeTree(Map<String, String> splitTree,
                                   Map<String, String> currentTree,
                                   Map<String, String> givenTree) {
         boolean encounterMergeConflict = false;
+        Set<String> allFiles = new HashSet<>(Set.copyOf(currentTree.keySet()));
+        allFiles.addAll(givenTree.keySet());
 
-        for (String f : givenTree.keySet()) {
+        for (String f : allFiles) {
             String split = splitTree.get(f);
             String given = givenTree.get(f);
             String current = currentTree.get(f);
-            if (current == null) {
-                if (splitTree.get(f) == null) {
-                    currentTree.put(f, givenTree.get(f));
-                }
-            } else if (!current.equals(given)) {
-                if (current.equals(split)) {
-                    // modified only in given.
-                    currentTree.put(f, givenTree.get(f));
-                } else if (!given.equals(split)) {
+            if (!stringEquals(given, current)) {
+                if (stringEquals(split, current)) {
+                    currentTree.put(f, given);
+                } else if (!stringEquals(split, given) && !stringEquals(split, current)) {
                     encounterMergeConflict = true;
-                    Blob givenBlob = readObject(join(Blob.BLOB_DIR, given), Blob.class);
-                    Blob currentBlob = readObject(join(Blob.BLOB_DIR, current), Blob.class);
+                    Blob givenBlob = Blob.load(given);
+                    Blob currentBlob = Blob.load(current);
                     String s = "<<<<<<< HEAD\n" +
-                            new String(currentBlob.content) +
+                            (currentBlob == null ? "" : new String(currentBlob.content)) +
                             "=======\n" +
-                            new String(givenBlob.content) +
+                            (givenBlob == null ? "" : new String(givenBlob.content)) +
                             ">>>>>>>";
                     Blob conflict = Blob.push(s.getBytes());
                     currentTree.put(f, conflict.hash);
                 }
             }
         }
-
-        currentTree.entrySet().removeIf(
-                f -> splitTree.containsKey(f.getKey()) && !givenTree.containsKey(f.getKey()));
-
         if (encounterMergeConflict) {
             message("Encountered a merge conflict.");
         }
         return currentTree;
     }
+
+    /**
+     * Test if string a and b has the same content,including the case that
+     * part of a and b is null.
+     */
+    private Boolean stringEquals(String a, String b) {
+        boolean aIsNull = a == null;
+        boolean bIsNull = b == null;
+        if (aIsNull != bIsNull) {
+            return false;
+        } else {
+            return aIsNull || a.equals(b);
+        }
+    }
+
 }

@@ -27,6 +27,16 @@ class StagingArea implements Serializable {
     }
 
     /**
+     * Load the staging area.
+     *
+     * @return a StagingArea object.
+     */
+    static StagingArea load() {
+        return readObject(join(Repository.GITLET_DIR, Config.STAGING_AREA_FILENAME)
+                , StagingArea.class);
+    }
+
+    /**
      * Checkout to the given commit hash.
      *
      * @param commitHash the commit to checkout.
@@ -34,26 +44,6 @@ class StagingArea implements Serializable {
     public void checkout(String commitHash) {
         Commit c = Commit.load(commitHash);
         checkout(c.hash, Commit.loadWorkTree(c.hash));
-    }
-
-    /**
-     * Checkout to the given work tree,restore all files in the CWD.
-     *
-     * @param prevCommitHash the previous commit hash relative to current tree.
-     * @param workTree       the tree of form <String,Blob> to checkout.
-     */
-    void checkout(String prevCommitHash, Map<String, Blob> workTree) {
-        this.prevCommitHash = prevCommitHash;
-        this.workTree = workTree;
-        List<String> allFiles = plainFilenamesIn(Repository.CWD);
-        if (allFiles != null) {
-            for (String file : allFiles) {
-                restrictedDelete(join(Repository.CWD, file));
-            }
-        }
-        for (String file : workTree.keySet()) {
-            restore(file, null);
-        }
     }
 
     /**
@@ -80,6 +70,41 @@ class StagingArea implements Serializable {
     }
 
     /**
+     * Checkout to the given work tree,restore all files in the CWD.
+     *
+     * @param prevCommitHash the previous commit hash relative to current tree.
+     * @param workTree       the tree of form <String,Blob> to checkout.
+     */
+    void checkout(String prevCommitHash, Map<String, Blob> workTree) {
+        this.prevCommitHash = prevCommitHash;
+        this.workTree = workTree;
+        List<String> allFiles = plainFilenamesIn(Repository.CWD);
+        if (allFiles != null) {
+            for (String file : allFiles) {
+                restrictedDelete(join(Repository.CWD, file));
+            }
+        }
+        for (String file : workTree.keySet()) {
+            restore(file, null);
+        }
+    }
+
+    /**
+     * Reset a file content to the staged or tracked version
+     *
+     * @param filename The file to reset.
+     * @param blob     A blob object,representing content of the file.
+     *                 If null is passed,restore the staged version.
+     */
+    void restore(String filename, Blob blob) {
+        File dest = join(Repository.CWD, filename);
+        blob = (blob == null) ? workTree.get(filename) : blob;
+        if (blob != null) {
+            writeContents(dest, blob.content);
+        }
+    }
+
+    /**
      * Remove a file from the staging area.
      *
      * @param name the file to remove.
@@ -102,21 +127,6 @@ class StagingArea implements Serializable {
             prev.ref();
         }
         working.pop();
-    }
-
-    /**
-     * Reset a file content to the staged or tracked version
-     *
-     * @param filename The file to reset.
-     * @param blob     A blob object,representing content of the file.
-     *                 If null is passed,restore the staged version.
-     */
-    void restore(String filename, Blob blob) {
-        File dest = join(Repository.CWD, filename);
-        blob = (blob == null) ? workTree.get(filename) : blob;
-        if (blob != null) {
-            writeContents(dest, blob.content);
-        }
     }
 
     /**
@@ -149,18 +159,6 @@ class StagingArea implements Serializable {
     }
 
     /**
-     * Test if the given file is staged for removal.
-     *
-     * @param filename the file to test.
-     * @return whether it is staged for removal.
-     */
-    boolean fileStagedForRemoval(String filename) {
-        Commit prev = Commit.load(prevCommitHash);
-        return !(prev == null)
-                && prev.contain(filename) && workTree.get(filename) == null;
-    }
-
-    /**
      * @return A set of files that is staged,not include those staged for removal.
      */
     Set<String> filesStaged() {
@@ -174,6 +172,18 @@ class StagingArea implements Serializable {
             }
         }
         return staged;
+    }
+
+    /**
+     * Test if the given file is staged for removal.
+     *
+     * @param filename the file to test.
+     * @return whether it is staged for removal.
+     */
+    boolean fileStagedForRemoval(String filename) {
+        Commit prev = Commit.load(prevCommitHash);
+        return !(prev == null)
+                && prev.contain(filename) && workTree.get(filename) == null;
     }
 
     /**
@@ -236,16 +246,6 @@ class StagingArea implements Serializable {
             }
         }
         return untracked;
-    }
-
-    /**
-     * Load the staging area.
-     *
-     * @return a StagingArea object.
-     */
-    static StagingArea load() {
-        return readObject(join(Repository.GITLET_DIR, Config.STAGING_AREA_FILENAME)
-                , StagingArea.class);
     }
 
     /**

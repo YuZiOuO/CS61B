@@ -39,14 +39,6 @@ public class Commit implements Serializable {
         return (Date) timestamp.clone();
     }
 
-    String getMessage() {
-        return message;
-    }
-
-    Map<String, String> getFiles() {
-        return new HashMap<>(files);
-    }
-
     /**
      * Create a Commit object using the given params.
      *
@@ -62,33 +54,6 @@ public class Commit implements Serializable {
         this.timestamp = timestamp;
         this.files = cache(files);
         this.hash = sha1(this.toString());
-    }
-
-    /**
-     * Interacting with the Blob class,cached all files in the given tree to blob.
-     *
-     * @param files the file tree.
-     * @return a map from file name to the cached blob hash.
-     */
-    private Map<String, String> cache(Map<String, Blob> files) {
-        HashMap<String, String> _files = new HashMap<>();
-        for (String name : files.keySet()) {
-            Blob b = files.get(name);
-            b.ref();
-            _files.put(name, b.hash);
-            b.dump();
-        }
-        return _files;
-    }
-
-    /**
-     * Test if the commit contain the given file.
-     *
-     * @param name the file to test.
-     * @return whether the file is included.
-     */
-    boolean contain(String name) {
-        return files.containsKey(name);
     }
 
     /**
@@ -116,6 +81,42 @@ public class Commit implements Serializable {
             dest.put(filename, b);
         }
         return dest;
+    }
+
+    /**
+     * Load a commit with given hash.
+     * The corresponding {@code Commit} mush been dumped in advance,Otherwise throw an error.
+     *
+     * @param hash the commit hash.
+     * @return null if {@code hash == null},otherwise the corresponding {@code Commit}.
+     */
+    static Commit load(String hash) {
+        return hash == null ? null : Utils.readObject(join(COMMIT_DIR, hash), Commit.class);
+    }
+
+    String getMessage() {
+        return message;
+    }
+
+    Map<String, String> getFiles() {
+        return new HashMap<>(files);
+    }
+
+    /**
+     * Interacting with the Blob class,cached all files in the given tree to blob.
+     *
+     * @param files the file tree.
+     * @return a map from file name to the cached blob hash.
+     */
+    private Map<String, String> cache(Map<String, Blob> files) {
+        HashMap<String, String> _files = new HashMap<>();
+        for (String name : files.keySet()) {
+            Blob b = files.get(name);
+            b.ref();
+            _files.put(name, b.hash);
+            b.dump();
+        }
+        return _files;
     }
 
     /**
@@ -163,6 +164,16 @@ public class Commit implements Serializable {
     }
 
     /**
+     * Test if the commit contain the given file.
+     *
+     * @param name the file to test.
+     * @return whether the file is included.
+     */
+    boolean contain(String name) {
+        return files.containsKey(name);
+    }
+
+    /**
      * Convert the Commit object to a human-readable format.
      *
      * @return the content of the commit.
@@ -189,17 +200,6 @@ public class Commit implements Serializable {
                 .format("%1$ta %1$tb %1$td %1$tT %1$tY %1$tz\n", this.getTimestamp())
                 .format(this.getMessage()).format("\n\n");
         return sb.toString();
-    }
-
-    /**
-     * Load a commit with given hash.
-     * The corresponding {@code Commit} mush been dumped in advance,Otherwise throw an error.
-     *
-     * @param hash the commit hash.
-     * @return null if {@code hash == null},otherwise the corresponding {@code Commit}.
-     */
-    static Commit load(String hash) {
-        return hash == null ? null : Utils.readObject(join(COMMIT_DIR, hash), Commit.class);
     }
 
     /**
