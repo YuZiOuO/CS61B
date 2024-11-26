@@ -224,8 +224,8 @@ public class Repository implements Serializable {
 
             stagingArea.checkout(refs.get(currentBranch), Commit.loadWorkTree(newTree));
             String[] parents = new String[]{refs.get(currentBranch), refs.get(branch)};
-            commit("Merged " + branch + " into " + currentBranch + "."
-                    , Date.from(Instant.now()), parents);
+            commit("Merged " + branch + " into " + currentBranch + ".",
+                    Date.from(Instant.now()), parents);
             refs.put(branch, refs.get(currentBranch));
         }
     }
