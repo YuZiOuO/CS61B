@@ -1,0 +1,47 @@
+I setup-repo.inc
+I setup-commit-once.inc
+I setup-commit-twice.inc
+
++ wug.txt notwug.txt
+> add wug.txt
+<<<
+
+> commit "change wug"
+<<<
+
+> log
+===
+${COMMIT_HEAD}
+change wug
+
+===
+${COMMIT_HEAD}
+twice2
+
+===
+${COMMIT_HEAD}
+twice1
+
+===
+${COMMIT_HEAD}
+once
+
+===
+${COMMIT_HEAD}
+setup commit with wug.txt
+
+===
+${COMMIT_HEAD}
+initial commit
+
+<<<*
+
+D UID "${5}"
+
+> reset ${UID}
+<<<
+
+* twice1
+* twice2
+* once
+= wug.txt wug.txt

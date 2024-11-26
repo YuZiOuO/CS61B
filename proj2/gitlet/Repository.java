@@ -192,7 +192,7 @@ public class Repository implements Serializable {
             sb.append(f).append("\n");
         }
 
-        sb.append("\n=== Modifications Not Staged For Commit ==\n");
+        sb.append("\n=== Modifications Not Staged For Commit ===\n");
         for (String f : stagingArea.filesUnstagedForRemoval()) {
             sb.append(f).append(" (deleted)\n");
         }
