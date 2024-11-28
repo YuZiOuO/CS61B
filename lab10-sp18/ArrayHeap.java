@@ -27,24 +27,22 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      * Returns the index of the node to the left of the node at i.
      */
     private static int leftIndex(int i) {
-        /* TODO: Your code here! */
-        return 0;
+        return 2 * i;
     }
 
     /**
      * Returns the index of the node to the right of the node at i.
      */
     private static int rightIndex(int i) {
-        /* TODO: Your code here! */
-        return 0;
+        return 2 * i + 1;
     }
 
     /**
      * Returns the index of the node that is the parent of the node at i.
+     * If i == 1, return 1,so that swim(1) would not crash.
      */
     private static int parentIndex(int i) {
-        /* TODO: Your code here! */
-        return 0;
+        return i == 1 ? 1 : i / 2;
     }
 
     /**
@@ -64,10 +62,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      * invalid because we leave the 0th entry blank.
      */
     private boolean inBounds(int index) {
-        if ((index > size) || (index < 1)) {
-            return false;
-        }
-        return true;
+        return (index <= size) && (index >= 1);
     }
 
     /**
@@ -106,9 +101,12 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     private void swim(int index) {
         // Throws an exception if index is invalid. DON'T CHANGE THIS LINE.
         validateSinkSwimArg(index);
-
-        /** TODO: Your code here. */
-        return;
+        int parentIndex = parentIndex(index);
+        // parentIndex(1) will return 1.
+        if (contents[parentIndex].myPriority > contents[index].myPriority) {
+            swap(index, parentIndex);
+            swim(parentIndex);
+        }
     }
 
     /**
@@ -117,9 +115,23 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     private void sink(int index) {
         // Throws an exception if index is invalid. DON'T CHANGE THIS LINE.
         validateSinkSwimArg(index);
+        int left = leftIndex(index);
+        int right = rightIndex(index);
 
-        /** TODO: Your code here. */
-        return;
+        double inf = Double.POSITIVE_INFINITY;
+        double leftPr = left > size?inf:contents[leftIndex(index)].myPriority;
+        double rightPr = right > size?inf:contents[rightIndex(index)].myPriority;
+        double myPr = contents[index].myPriority;
+
+        if (myPr < leftPr && myPr < rightPr) {
+            return;
+        } else if (leftPr < rightPr) {
+            swap(index, leftIndex(index));
+            sink(leftIndex(index));
+        } else {
+            swap(index, rightIndex(index));
+            sink(rightIndex(index));
+        }
     }
 
     /**
@@ -132,8 +144,10 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         if (size + 1 == contents.length) {
             resize(contents.length * 2);
         }
-
-        /* TODO: Your code here! */
+        size += 1;
+        Node newNode = new Node(item, priority);
+        contents[size] = newNode;
+        swim(size);
     }
 
     /**
@@ -142,8 +156,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      */
     @Override
     public T peek() {
-        /* TODO: Your code here! */
-        return null;
+        return contents[1].myItem;
     }
 
     /**
@@ -157,8 +170,15 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      */
     @Override
     public T removeMin() {
-        /* TODO: Your code here! */
-        return null;
+        T returnValue = contents[1].myItem;
+
+        swap(1, size);
+        contents[size] = null;
+        if(size != 1){
+            sink(1);
+        }
+        size -= 1;
+        return returnValue;
     }
 
     /**
@@ -176,11 +196,32 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      * priority. You can assume the heap will not have two nodes with the same
      * item. Check item equality with .equals(), not ==. This is a challenging
      * bonus problem, but shouldn't be too hard if you really understand heaps
-     * and think about the algorithm before you start to code.
+     * and think about the algorithm before you start to code.<br>
+     * If the item is not in the heap,the function acts like insert().
      */
     @Override
     public void changePriority(T item, double priority) {
-        /* TODO: Your code here! */
+        int prevPos;
+        boolean found = false;
+        for (prevPos = 1; prevPos <= size; prevPos++) {
+            Node prevNode = getNode(prevPos);
+            if(item.equals(prevNode.myItem)) {
+                found = true;
+                break;
+            }
+        }
+
+        if(!found){
+            insert(item, priority);
+        }else{
+            int parentIndex = parentIndex(prevPos);
+            if(priority < contents[parentIndex].myPriority) {
+                swim(prevPos);
+            }else{
+                sink(prevPos);
+            }
+        }
+
         return;
     }
 
