@@ -197,7 +197,7 @@ public class Commit implements Serializable {
         Formatter f = new Formatter(sb, Locale.US);
         f.format("===\ncommit ").format(this.hash).format("\nDate: ")
                 .format("%1$ta %1$tb %1$td %1$tT %1$tY %1$tz\n", this.getTimestamp())
-                .format(this.getMessage()).format("\n\n");
+                .format(message).format("\n\n");
         return sb.toString();
     }
 

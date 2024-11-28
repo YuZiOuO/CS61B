@@ -117,7 +117,7 @@ public class Repository implements Serializable {
                 sb.append(Commit.load(n).toLog());
             }
         }
-        return sb.toString();
+        return sb.append("\n").toString();
     }
 
     /**
