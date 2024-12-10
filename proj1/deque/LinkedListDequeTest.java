@@ -114,8 +114,9 @@ public class LinkedListDequeTest {
 
     @Test
     /* Randomized tests including all kinds of operations. */
-    public void randomTest() {
-        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+    public void randomCompareTest() {
+        Deque<Integer> lld = new LinkedListDeque<>();
+        Deque<Integer> ard = new ArrayDeque<>();
         int size = 0;
         for (int i = 0; i < MAX_TRIES; i++) {
             int operationType = StdRandom.uniform(0, 4);
@@ -123,41 +124,43 @@ public class LinkedListDequeTest {
                 /* addFirst */
                 int item = StdRandom.uniform(0, 100);
                 lld.addFirst(item);
+                ard.addFirst(item);
                 size++;
-                lld.printDeque();
                 assertEquals((int) lld.get(0), item);
-                assertFalse(lld.isEmpty());
-                assertEquals(lld.size(), size);
+                assertEquals((int) ard.get(0), item);
             } else if (operationType == 1) {
                 /* addLast */
                 int item = StdRandom.uniform(0, 100);
                 lld.addLast(item);
+                ard.addLast(item);
                 size++;
                 lld.printDeque();
                 assertEquals((int) lld.get(lld.size() - 1), item);
-                assertFalse(lld.isEmpty());
-                assertEquals(lld.size(), size);
+                assertEquals((int) ard.get(lld.size() - 1), item);
             } else if (operationType == 2) {
                 /* removeFirst */
                 if (lld.isEmpty()) {
                     assertNull(lld.removeFirst());
                 } else {
                     size--;
-                    lld.printDeque();
+                    assertEquals(ard.get(0), lld.get(0));
                     assertEquals(lld.get(0), lld.removeFirst());
+                    assertEquals(ard.get(0), ard.removeFirst());
                 }
             } else if (operationType == 3) {
                 /* removeLast */
                 if (lld.isEmpty()) {
                     assertNull(lld.removeLast());
+                    assertNull(ard.removeLast());
                 } else {
                     size--;
-                    lld.printDeque();
+                    assertEquals(ard.get(lld.size() - 1), lld.get(lld.size() - 1));
                     assertEquals(lld.get(lld.size() - 1), lld.removeLast());
+                    assertEquals(ard.get(ard.size() - 1), ard.removeLast());
                 }
             } else {
-                lld.printDeque();
                 assertEquals(lld.size(), size);
+                assertEquals(ard.size(), lld.size());
             }
         }
     }

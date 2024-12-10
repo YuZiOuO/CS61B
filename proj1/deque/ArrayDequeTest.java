@@ -174,7 +174,7 @@ public class ArrayDequeTest {
 
         assertTrue(lld1.equals(lld2));
         assertFalse(lld1.equals(lld3));
-        assertEquals(lld1.hashCode(), lld3.hashCode());
+        assertEquals(lld1, lld2);
     }
 
     /* build a string in the format of ArrayDeque.printDeque() */

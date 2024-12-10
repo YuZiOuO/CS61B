@@ -74,15 +74,11 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     /* return ith item where i starts from 0 to size()-1 */
     @Override
     public T get(int index) {
-        index = index + 1; //staring from 1;
-        return getByIndex(index >= index / 2 + 1 ? index - size - 1 : index);
-    }
-
-    public T getRecursive(int index) {
-        if (size == 0 || index < 0 || index >= size) {
-            return null;
+        Node<T> node = sentinel.next;
+        for (int i = 0; i < index; i++) {
+            node = node.next;
         }
-        return getRecursiveNode(index + 1, sentinel);
+        return node == null ? null : node.item;
     }
 
     @Override
@@ -123,36 +119,6 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
                 return index >= size ? null : currentNode.item;
             }
         };
-    }
-
-    /** return ith item STARTING FROM 1
-     * no matter whether the sign of i is positive
-     * (i of sentinel is 0)
-     */
-    private T getByIndex(int index) {
-        if (size == 0 || index == 0 || abs(index) > size) {
-            return null;
-        }
-        Node<T> current = sentinel;
-        int iter = 0;
-        while (iter != index) {
-            if (index > 0) {
-                iter++;
-                current = current.next;
-            } else {
-                iter--;
-                current = current.prev;
-            }
-        }
-        return current.item;
-    }
-
-    private T getRecursiveNode(int index, Node<T> current) {
-        if (index == 0) {
-            return current.item;
-        } else {
-            return getRecursiveNode(index - 1, current.next);
-        }
     }
 
     private static class Node<T> {
