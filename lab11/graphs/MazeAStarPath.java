@@ -1,7 +1,9 @@
 package lab11.graphs;
 
+import java.util.PriorityQueue;
+
 /**
- *  @author Josh Hug
+ * @author Josh Hug
  */
 public class MazeAStarPath extends MazeExplorer {
     private int s;
@@ -18,20 +20,53 @@ public class MazeAStarPath extends MazeExplorer {
         edgeTo[s] = s;
     }
 
-    /** Estimate of the distance from v to the target. */
+    /**
+     * Estimate of the distance from v to the target.
+     */
     private int h(int v) {
-        return -1;
+        return Math.abs(maze.toX(v) - maze.toX(t)) + Math.abs(maze.toY(v) - maze.toY(t));
     }
 
-    /** Finds vertex estimated to be closest to target. */
-    private int findMinimumUnmarked() {
-        return -1;
-        /* You do not have to use this method. */
-    }
-
-    /** Performs an A star search from vertex s. */
+    /**
+     * Performs an A star search from vertex s.
+     */
     private void astar(int s) {
-        // TODO
+        PriorityQueue<aStarNode> q = new PriorityQueue<>();
+        distTo[s] = 0;
+        edgeTo[s] = s;
+        q.offer(new aStarNode(s, distTo[s], h(s)));
+        while (!q.isEmpty()) {
+            aStarNode current = q.poll();
+            int currentDis = distTo[edgeTo[current.v]] + 1;
+            distTo[current.v] = currentDis;
+            marked[current.v] = true;
+
+            if (current.v == t) {
+                announce();
+                break;
+            }
+            for (int adjacent : maze.adj(current.v)) {
+                if (!marked[adjacent]) {
+                    edgeTo[adjacent] = current.v;
+                    q.offer(new aStarNode(adjacent, currentDis + 1, h(adjacent)));
+                }
+            }
+            announce();
+        }
+    }
+
+    static class aStarNode implements Comparable<aStarNode> {
+        int v, est;
+
+        aStarNode(int v, int d, int h) {
+            this.v = v;
+            est = d + h;
+        }
+
+        @Override
+        public int compareTo(aStarNode o) {
+            return est - o.est;
+        }
     }
 
     @Override
