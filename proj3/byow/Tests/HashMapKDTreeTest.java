@@ -1,4 +1,4 @@
-package byow.Tests.Util;
+package byow.Tests;
 
 import byow.Util.HashMapKDTree;
 import byow.Util.KDTree;

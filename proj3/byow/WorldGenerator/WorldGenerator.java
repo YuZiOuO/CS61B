@@ -1,5 +1,7 @@
 package byow.WorldGenerator;
 
+import byow.TileEngine.TETile;
+
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -16,41 +18,54 @@ public class WorldGenerator {
     public final int resolution;
     public int usedTiles;
 
-    public WorldGenerator(int resolutionX,int resolutionY) {
+    public WorldGenerator(int resolutionX, int resolutionY) {
         this.resX = resolutionX;
         this.resY = resolutionY;
         this.resolution = resolutionX * resolutionY;
         usedTiles = 0;
     }
 
-    public Set<Entity> generate(int seed){
-        Random rand = new Random(seed);
+    public static TETile[][] render(TETile[][] tiles, Set<Entity> entities) {
+        for (Entity e : entities) {
+            e.render(tiles);
+        }
+        return tiles;
+    }
+
+    public Set<Entity> generate(int seed) {
+        Random rng = new Random(seed);
         HashSet<Entity> entities = new HashSet<>();
-        while(continueGeneration()){
-            Room r = generateRoom(rand);
+        while (continueGeneration(rng)) {
+            Room r = generateRoom(rng);
             entities.add(r);
-            usedTiles += r.utilityTiles();
+            usedTiles += r.usedTiles();
         }
         return entities;
     }
 
-    private boolean continueGeneration(){
-        double rate = (double) usedTiles / (double)resolution;
-        if(rate < MIN_UTILITY_RATE){
+    private boolean continueGeneration(Random rng) {
+        double rate = (double) usedTiles / (double) resolution;
+        if (rate < MIN_UTILITY_RATE) {
             return true;
-        }else if(rate > MAX_UTILITY_RATE){
+        } else if (rate > MAX_UTILITY_RATE) {
             return false;
-        }else{
-            Random rand = new Random();
-            return rand.nextDouble() < GENERATION_PROBABILITY;
+        } else {
+            return rng.nextDouble() < GENERATION_PROBABILITY;
         }
     }
 
-    private Room generateRoom(Random rand){
-        int x = rand.nextInt(0, resX-Room.MAX_EDGE_LENGTH);
-        int y = rand.nextInt(0, resY-Room.MAX_EDGE_LENGTH);
-        int width = rand.nextInt(Room.MIN_EDGE_LENGTH, Room.MAX_EDGE_LENGTH);
-        int height = rand.nextInt(Room.MIN_EDGE_LENGTH, Room.MAX_EDGE_LENGTH);
-        return new Room(x,y,width,height);
+    private Room generateRoom(Random rng) {
+        int x = rng.nextInt(Corridor.MIN_HEIGHT, resX - Room.MAX_EDGE_LENGTH - Corridor.MIN_HEIGHT);
+        int y = rng.nextInt(Corridor.MIN_HEIGHT, resY - Room.MAX_EDGE_LENGTH - Corridor.MIN_HEIGHT);
+        int width = rng.nextInt(Room.MIN_EDGE_LENGTH, Room.MAX_EDGE_LENGTH);
+        int height = rng.nextInt(Room.MIN_EDGE_LENGTH, Room.MAX_EDGE_LENGTH);
+        Direction dir = Direction.random(rng);
+        int entryPos = (dir == Direction.EAST || dir == Direction.WEST) ?
+                rng.nextInt(height) : rng.nextInt(width);
+        return new Room(x, y, width, height, entryPos, dir);
+    }
+
+    private boolean validateRoom(Room room) {
+        return false;
     }
 }

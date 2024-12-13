@@ -1,11 +1,13 @@
 package byow.WorldGenerator;
 
-public abstract class Entity {
-    public final int x;
-    public final int y;
-    public Entity(int x, int y) {
-        this.x = x;
-        this.y = y;
-    }
-    public abstract int utilityTiles();
+import byow.TileEngine.TETile;
+
+public interface Entity {
+    public int X();
+
+    public int Y();
+
+    public int usedTiles();
+
+    public void render(TETile[][] world);
 }

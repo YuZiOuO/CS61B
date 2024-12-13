@@ -1,13 +1,14 @@
 package byow.Core;
 
+import byow.Config;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 
 public class Engine {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
-    public static final int WIDTH = 80;
-    public static final int HEIGHT = 30;
+    public static final int WIDTH = Config.CANVAS_WIDTH;
+    public static final int HEIGHT = Config.CANVAS_HEIGHT;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
